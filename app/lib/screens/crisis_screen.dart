@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
