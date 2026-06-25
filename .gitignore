@@ -34,6 +34,9 @@ Recovery app design integration*.zip
 Thumbs.db
 *.tmp
 
-# --- helper scripts (local only) ---
+# --- helper scripts / logs (local only) ---
 _push_to_github.bat
+_push_update.bat
 _install_flutter.bat
+_push_log.txt
+app/assets/.writetest
