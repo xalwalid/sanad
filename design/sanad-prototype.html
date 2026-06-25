@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanad — interactive prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.7.0/tabler-icons.min.css">
+<style>
+:root{
+  --forest:#1F5740; --deep:#10362A; --mid:#3B7A57; --sage:#8FBF9F;
+  --mint:#EAF3EE; --mintDeep:#DCEEE3; --gold:#E3B23C; --danger:#C0563B;
+  --ink:#13402C; --muted:#6B7A72; --line:#E3ECE6;
+  --grad:linear-gradient(150deg,#246A4D 0%,#1B5640 55%,#143E2F 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(1200px 800px at 50% -10%,#cfe6d8,#a9cdb8 60%,#8fb9a3);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:var(--ink)}
+.wrap{display:flex;gap:30px;align-items:center;flex-wrap:wrap;justify-content:center}
+.pitch{max-width:300px;color:#10362A}
+.pitch h1{font-size:30px;font-weight:800;line-height:1.15;margin-bottom:10px}
+.pitch p{font-size:15px;line-height:1.6;color:#1c4636;margin-bottom:14px}
+.pitch .tag{display:inline-block;background:#10362A;color:#cfe6d8;font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;margin-bottom:16px}
+.pitch ul{list-style:none;font-size:13.5px;line-height:1.5;color:#1c4636}
+.pitch li{padding:5px 0 5px 24px;position:relative}
+.pitch li::before{content:"\2713";position:absolute;left:0;color:var(--forest);font-weight:700}
+
+/* phone */
+.phone{width:392px;height:830px;background:#fff;border-radius:46px;border:11px solid #0c2a20;position:relative;overflow:hidden;box-shadow:0 40px 90px rgba(13,50,38,.45)}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:26px;background:#0c2a20;border-radius:0 0 18px 18px;z-index:60}
+.screenport{position:absolute;inset:0;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;padding-bottom:96px;display:none;animation:fade .35s ease}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* hero */
+.hero{background:var(--grad);color:#fff;padding:46px 22px 26px;border-radius:0 0 30px 30px;position:relative}
+.hero .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#bfe0cd;margin-bottom:14px}
+.hero .top b{color:#fff;font-weight:600}
+.clock{text-align:center;margin:6px 0 4px}
+.clock .days{font-size:64px;font-weight:800;line-height:1}
+.clock .dlabel{font-size:13px;color:#bfe0cd;letter-spacing:.5px}
+.hms{display:flex;justify-content:center;gap:18px;margin-top:12px}
+.hms div{font-size:13px;color:#d7ede0}
+.hms b{display:block;font-size:18px;font-weight:700;color:#fff}
+.nextbadge{margin:16px auto 0;background:rgba(255,255,255,.14);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#eafaf1}
+.nextbadge .barwrap{flex:1;height:7px;background:rgba(255,255,255,.25);border-radius:6px;overflow:hidden}
+.nextbadge .bar{height:100%;background:var(--gold);border-radius:6px}
+
+.body{padding:18px 16px 0}
+.sectitle{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 4px 10px}
+
+/* pledge */
+.pledge{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:16px;text-align:center;box-shadow:0 8px 22px rgba(20,62,47,.06)}
+.pledge h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.pledge p{font-size:13px;color:var(--muted);margin-bottom:12px}
+.pbtn{background:var(--forest);color:#fff;border:none;border-radius:14px;padding:13px 18px;font-size:14px;font-weight:600;width:100%;cursor:pointer;transition:transform .1s}
+.pbtn:active{transform:scale(.97)}
+.pbtn.gold{background:var(--gold);color:#3a2c06}
+.quote{background:var(--mint);border-radius:14px;padding:14px;font-size:13.5px;color:var(--ink);font-style:italic;margin-top:12px;display:none}
+
+/* stat grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:14px}
+.stat .ic{width:36px;height:36px;border-radius:11px;background:var(--mint);display:flex;align-items:center;justify-content:center;color:var(--forest);font-size:20px;margin-bottom:8px}
+.stat .v{font-size:22px;font-weight:800;color:var(--ink)}
+.stat .l{font-size:12px;color:var(--muted)}
+
+/* sos */
+.sos{background:linear-gradient(135deg,#C0563B,#9c3f29);color:#fff;border:none;border-radius:18px;padding:16px;width:100%;display:flex;align-items:center;gap:12px;cursor:pointer;margin-top:4px;font-family:inherit}
+.sos i{font-size:26px}
+.sos b{font-size:15px;font-weight:700}
+.sos span{font-size:12px;color:#ffe2d8}
+
+/* badges */
+.badgegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge{text-align:center;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 6px}
+.badge .circ{width:50px;height:50px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--mint);color:var(--sage)}
+.badge.earned .circ{background:var(--gold);color:#fff}
+.badge .n{font-size:12px;font-weight:700;color:var(--ink)}
+.badge .s{font-size:10px;color:var(--muted)}
+.badge.locked{opacity:.55}
+
+/* reasons / list */
+.reason{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
+.reason .em{width:42px;height:42px;border-radius:12px;background:var(--mintDeep);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--forest)}
+.reason .t{font-size:13.5px;font-weight:600}
+.reason .d{font-size:12px;color:var(--muted)}
+
+/* chart */
+.chartcard{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:16px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:8px}
+.bars .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.bars .b{width:70%;background:var(--sage);border-radius:6px 6px 0 0}
+.bars .b.hi{background:var(--forest)}
+.bars .x{font-size:10px;color:var(--muted)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.cal .d{aspect-ratio:1;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
+.cal .d.on{background:var(--forest);color:#fff;font-weight:700}
+.cal .d.relapse{background:#f0d3cb;color:var(--danger)}
+
+/* learn timeline */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tlitem{position:relative;margin-bottom:14px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px}
+.tlitem::before{content:"";position:absolute;left:-22px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--forest);border:3px solid #fff;box-shadow:0 0 0 2px var(--sage)}
+.tlitem h4{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.tlitem p{font-size:12.5px;color:var(--muted);line-height:1.5}
+.tlitem.warn{border-color:#eccfc7;background:#fcf3f0}
+.tlitem.warn h4{color:var(--danger)}
+
+/* community teaser */
+.post{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.post .h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.post .av{width:34px;height:34px;border-radius:50%;background:var(--mid);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.post .u{font-size:13px;font-weight:600}
+.post .meta{font-size:11px;color:var(--muted)}
+.post .txt{font-size:13px;line-height:1.5;color:var(--ink)}
+.post .react{display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--muted)}
+.lockbar{background:var(--mintDeep);border-radius:14px;padding:14px;text-align:center;font-size:12.5px;color:var(--ink);margin-bottom:14px}
+.lockbar b{display:block;font-size:13.5px;margin-bottom:2px}
+
+/* share card */
+.sharecard{background:var(--grad);border-radius:24px;padding:30px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.sharecard .ribbon{font-size:40px;color:#ffdd91}
+.sharecard .big{font-size:42px;font-weight:800;margin:8px 0 0}
+.sharecard .sub{color:#bfe0cd;font-size:13px}
+.sharecard .row{display:flex;justify-content:center;gap:28px;margin-top:16px}
+.sharecard .row b{font-size:20px;font-weight:800;display:block}
+.sharecard .row span{font-size:11px;color:#bfe0cd}
+.sharecard .wm{margin-top:18px;font-size:12px;color:#9fcbb1}
+.toggle{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;font-size:13.5px}
+.sw{width:42px;height:24px;border-radius:14px;background:var(--sage);position:relative;cursor:pointer;transition:.2s}
+.sw.on{background:var(--forest)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on::after{left:20px}
+
+/* bottom nav */
+.nav{position:absolute;left:0;right:0;bottom:0;height:78px;background:#fff;border-top:1.5px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding-bottom:10px;z-index:50}
+.nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;cursor:pointer;font-family:inherit}
+.nav button i{font-size:23px}
+.nav button.on{color:var(--forest);font-weight:700}
+
+/* generic */
+.subhead{padding:20px 18px 6px;display:flex;align-items:center;gap:10px}
+.subhead i{font-size:20px;color:var(--forest);cursor:pointer}
+.subhead h2{font-size:19px;font-weight:800}
+.btnrow{padding:0 16px}
+.linkbtn{background:none;border:none;color:var(--muted);font-size:13px;width:100%;padding:14px;cursor:pointer;font-family:inherit}
+.bigbtn{background:var(--forest);color:#fff;border:none;border-radius:16px;padding:15px;font-size:14.5px;font-weight:600;width:100%;cursor:pointer;font-family:inherit}
+.bigbtn.ghost{background:#fff;color:var(--forest);border:1.5px solid var(--sage)}
+
+/* SOS overlay */
+.overlay{position:absolute;inset:0;background:var(--grad);z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px}
+.overlay.show{display:flex}
+.breathe{width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:15px;animation:breathe 8s ease-in-out infinite;margin:20px 0}
+@keyframes breathe{0%,100%{transform:scale(.7)}50%{transform:scale(1.05)}}
+.overlay h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.overlay p{font-size:14px;color:#cfe6d8;max-width:240px;line-height:1.55}
+.overlay .close{margin-top:24px;background:#fff;color:var(--forest);border:none;border-radius:14px;padding:13px 26px;font-weight:700;cursor:pointer;font-family:inherit}
+@media(max-width:880px){.pitch{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pitch">
+    <span class="tag">Sanad · interactive prototype</span>
+    <h1>This is the real feel of the app.</h1>
+    <p>Tap around like it's on your phone — the clock ticks live, the pledge gives a quote, the SOS button opens a breathing exercise, and the card is ready to share.</p>
+    <ul>
+      <li>Live sober clock + next milestone</li>
+      <li>Daily pledge & motivation</li>
+      <li>Money / time / units saved</li>
+      <li>Milestone badges</li>
+      <li>Craving SOS mode</li>
+      <li>Mood & trigger tracking</li>
+      <li>Withdrawal timeline (offline)</li>
+      <li>Anonymous community (Phase 3)</li>
+      <li>Shareable progress card</li>
+    </ul>
+  </div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screenport">
+
+      <!-- HOME -->
+      <div class="screen active" id="s-home">
+        <div class="hero">
+          <div class="top"><span>سند · <b>cannabis-free</b></span><span><i class="ti ti-flame"></i> <b id="streakTop">33</b></span></div>
+          <div class="clock">
+            <div class="days" id="cDays">33</div>
+            <div class="dlabel">DAYS CLEAN</div>
+            <div class="hms"><div><b id="cH">12</b>hrs</div><div><b id="cM">41</b>min</div><div><b id="cS">08</b>sec</div></div>
+          </div>
+          <div class="nextbadge"><i class="ti ti-award"></i><span>67 to <b>100</b></span><div class="barwrap"><div class="bar" style="width:33%"></div></div></div>
+        </div>
+        <div class="body">
+          <div class="pledge">
+            <h3>Today's pledge</h3>
+            <p>Sobriety is a 24-hour promise. Make today's.</p>
+            <button class="pbtn" id="pledgeBtn" onclick="takePledge()">I pledge to stay clean today</button>
+            <div class="quote" id="quote"></div>
+          </div>
+
+          <div class="sectitle">What you've reclaimed</div>
+          <div class="grid">
+            <div class="stat"><div class="ic"><i class="ti ti-coin"></i></div><div class="v" id="stMoney">$396</div><div class="l">money saved</div></div>
+            <div class="stat"><div class="ic"><i class="ti ti-clock-hour-4"></i></div><div class="v" id="stTime">50h</div><div class="l">time reclaimed</div></div>
+            <div class="stat"><div class="ic"><i class="ti ti-leaf"></i></div><div class="v" id="stUnits">66</div><div class="l">joints avoided</div></div>
+            <div class="stat"><div class="ic"><i class="ti ti-heart"></i></div><div class="v">Better</div><div class="l">sleep & focus</div></div>
+          </div>
+
+          <div class="sectitle">Feeling a craving?</div>
+          <button class="sos" onclick="openSOS()"><i class="ti ti-urgent"></i><div style="text-align:left"><b>SOS — ride the wave</b><br><span>A craving passes in ~20 minutes. Let's get through it.</span></div></button>
+
+          <div class="sectitle" style="display:flex;justify-content:space-between"><span>This week</span><span style="color:var(--forest);cursor:pointer" onclick="show('learn')">See timeline</span></div>
+          <div class="tlitem" style="margin-left:0"><h4>The fog is lifting</h4><p>By week 5 the sharpest symptoms have eased. Sleep may still be uneven — that's normal and it passes. Notice the small wins.</p></div>
+
+          <button class="bigbtn ghost" style="margin-top:14px" onclick="show('card')"><i class="ti ti-share"></i>&nbsp; Share my progress card</button>
+          <button class="linkbtn" onclick="show('relapse')">I relapsed</button>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="screen" id="s-progress">
+        <div class="subhead"><h2>Your progress</h2></div>
+        <div class="body" style="padding-top:0">
+          <div class="sectitle">Mood, last 7 days</div>
+          <div class="chartcard">
+            <div class="bars" id="moodBars"></div>
+          </div>
+          <div class="sectitle">Cravings are getting weaker</div>
+          <div class="chartcard">
+            <div class="bars" id="craveBars"></div>
+          </div>
+          <div class="sectitle">Your clean days</div>
+          <div class="chartcard"><div class="cal" id="cal"></div></div>
+          <div class="sectitle">Milestones</div>
+          <div class="badgegrid" id="badges"></div>
+        </div>
+      </div>
+
+      <!-- LEARN -->
+      <div class="screen" id="s-learn">
+        <div class="subhead"><h2>What to expect</h2></div>
+        <div class="body" style="padding-top:0">
+          <div class="reason" style="margin-bottom:14px"><div class="em"><i class="ti ti-leaf"></i></div><div><div class="t">Cannabis recovery</div><div class="d">Your personal timeline</div></div></div>
+          <div class="tl">
+            <div class="tlitem"><h4>Week 1 — the steepest climb</h4><p>Cravings, irritability and poor sleep peak around day three. Your body is recalibrating, not failing. Water, movement, busy hands.</p></div>
+            <div class="tlitem"><h4>Week 2 — the fog lifts</h4><p>Sharpest symptoms ease. Mood steadies. Sleep and vivid dreams can stay unsettled a while — that's expected.</p></div>
+            <div class="tlitem"><h4>Week 4 — a new normal</h4><p>Most people feel a real improvement. Now it's about replacing old routines with ones that serve you.</p></div>
+            <div class="tlitem"><h4>Week 8+ — protecting progress</h4><p>The physical chapter is mostly behind you. Watch stress and boredom; lean on your routine.</p></div>
+          </div>
+          <div class="sectitle">A note for others</div>
+          <div class="tlitem warn"><h4><i class="ti ti-alert-triangle"></i> Quitting alcohol?</h4><p>Heavy long-term drinkers can face dangerous withdrawal. Please talk to a doctor first — Sanad is a supportive tool, not medical care.</p></div>
+        </div>
+      </div>
+
+      <!-- COMMUNITY -->
+      <div class="screen" id="s-community">
+        <div class="subhead"><h2>Community</h2></div>
+        <div class="body" style="padding-top:0">
+          <div class="lockbar"><b><i class="ti ti-lock"></i> Anonymous community — Phase 3</b>No names, no faces. Just people who get it. A preview of what's coming.</div>
+          <div class="post"><div class="h"><div class="av">QN</div><div><div class="u">QuietNorth</div><div class="meta">day 12 · cannabis</div></div></div><div class="txt">Made it through a really hard weekend. The SOS breathing thing actually helped at 2am. Thank you all.</div><div class="react"><span><i class="ti ti-heart"></i> 48</span><span><i class="ti ti-message-circle"></i> 12</span></div></div>
+          <div class="post"><div class="h"><div class="av">SR</div><div><div class="u">SteadyRiver</div><div class="meta">day 90 · alcohol</div></div></div><div class="txt">90 days today. Six months ago I didn't think I'd get past day 3. It does get easier. Keep going.</div><div class="react"><span><i class="ti ti-heart"></i> 134</span><span><i class="ti ti-message-circle"></i> 27</span></div></div>
+          <div class="post"><div class="h"><div class="av">M7</div><div><div class="u">Mountain7</div><div class="meta">day 4 · nicotine</div></div></div><div class="txt">Craving hit hard after lunch. Posting here instead of giving in. Small win but it's mine.</div><div class="react"><span><i class="ti ti-heart"></i> 61</span><span><i class="ti ti-message-circle"></i> 9</span></div></div>
+        </div>
+      </div>
+
+      <!-- ME -->
+      <div class="screen" id="s-me">
+        <div class="hero" style="padding-bottom:20px">
+          <div class="clock" style="margin-top:8px"><div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;margin:0 auto 8px">N</div><div style="font-size:17px;font-weight:700">Anonymous · Nightingale</div><div class="dlabel">Libya · joined this month</div></div>
+        </div>
+        <div class="body">
+          <div class="sectitle">Why I'm doing this</div>
+          <div class="reason"><div class="em"><i class="ti ti-mood-kid"></i></div><div><div class="t">For my kids</div><div class="d">Be present, not foggy</div></div></div>
+          <div class="reason"><div class="em"><i class="ti ti-wallet"></i></div><div><div class="t">Save for the move</div><div class="d">$396 so far</div></div></div>
+          <div class="sectitle">What I'm tracking</div>
+          <div class="reason"><div class="em"><i class="ti ti-leaf"></i></div><div><div class="t">Cannabis</div><div class="d">33 days · longest yet</div></div></div>
+          <div class="reason" style="opacity:.7"><div class="em"><i class="ti ti-plus"></i></div><div><div class="t">Add another</div><div class="d">Track more than one habit</div></div></div>
+          <div class="sectitle">Privacy & data</div>
+          <div class="reason"><div class="em"><i class="ti ti-device-mobile"></i></div><div><div class="t">Everything is on this phone</div><div class="d">No account. Nothing uploaded.</div></div></div>
+          <div class="reason"><div class="em"><i class="ti ti-download"></i></div><div><div class="t">Back up with a code</div><div class="d">Restore on a new phone, no sign-in</div></div></div>
+          <div class="reason"><div class="em"><i class="ti ti-language"></i></div><div><div class="t">Language</div><div class="d">English · العربية</div></div></div>
+        </div>
+      </div>
+
+      <!-- SHARE CARD -->
+      <div class="screen" id="s-card">
+        <div class="subhead"><i class="ti ti-arrow-left" onclick="show('home')"></i><h2>Your card</h2></div>
+        <div class="body" style="padding-top:4px">
+          <div class="sharecard">
+            <div class="ribbon"><i class="ti ti-award"></i></div>
+            <div class="big">33 days</div>
+            <div class="sub">clean and counting</div>
+            <div class="row"><div id="cardMoneyWrap"><b>$396</b><span>saved</span></div><div id="cardTimeWrap"><b>50h</b><span>reclaimed</span></div></div>
+            <div class="wm">سند · sanad.com.ly</div>
+          </div>
+          <div class="toggle">Show money saved<div class="sw on" onclick="this.classList.toggle('on');toggleCard()"></div></div>
+          <div class="toggle">Show time reclaimed<div class="sw on" onclick="this.classList.toggle('on');toggleCard()"></div></div>
+          <button class="bigbtn" style="margin-top:14px" onclick="shared(this)"><i class="ti ti-share"></i>&nbsp; Share my card</button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px" id="shareNote">Opens WhatsApp, Instagram, Facebook…</p>
+        </div>
+      </div>
+
+      <!-- RELAPSE -->
+      <div class="screen" id="s-relapse">
+        <div class="subhead"><i class="ti ti-arrow-left" onclick="show('home')"></i><h2>A new start</h2></div>
+        <div class="body" style="padding-top:4px;text-align:center">
+          <div style="width:70px;height:70px;border-radius:50%;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--mid);margin:10px auto 14px"><i class="ti ti-heart"></i></div>
+          <h3 style="font-size:18px;font-weight:800;margin-bottom:6px">Recovery isn't a straight line</h3>
+          <p style="font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:18px">You're not back to zero — you're back with everything you learned. We're keeping your history.</p>
+          <div class="reason" style="text-align:left"><div class="em"><i class="ti ti-trophy"></i></div><div><div class="t">Longest streak kept</div><div class="d">33 days — that's still yours</div></div></div>
+          <div class="reason" style="text-align:left"><div class="em"><i class="ti ti-history"></i></div><div><div class="t">Your history</div><div class="d">Preserved, every day of it</div></div></div>
+          <button class="bigbtn" style="margin-top:8px" onclick="show('home')">Start day 1 again</button>
+          <button class="linkbtn" onclick="openSOS()"><i class="ti ti-lifebuoy"></i>&nbsp; Need support right now?</button>
+        </div>
+      </div>
+
+      <!-- SOS overlay -->
+      <div class="overlay" id="sos">
+        <h2>You can ride this out</h2>
+        <p>Breathe with the circle. In as it grows, out as it shrinks. A craving is a wave — it always passes.</p>
+        <div class="breathe" id="breatheTxt">Breathe in…</div>
+        <p>Most cravings fade within 20 minutes. You've already started the clock.</p>
+        <button class="close" onclick="closeSOS()">I'm okay now</button>
+      </div>
+
+    </div>
+
+    <div class="nav">
+      <button class="on" data-n="home" onclick="show('home',this)"><i class="ti ti-home"></i>Home</button>
+      <button data-n="progress" onclick="show('progress',this)"><i class="ti ti-chart-line"></i>Progress</button>
+      <button data-n="learn" onclick="show('learn',this)"><i class="ti ti-book"></i>Learn</button>
+      <button data-n="community" onclick="show('community',this)"><i class="ti ti-users"></i>Community</button>
+      <button data-n="me" onclick="show('me',this)"><i class="ti ti-user"></i>Me</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var QUIT = new Date(Date.now() - (33*24*3600 + 12*3600 + 41*60)*1000);
+var SPEND=12, MINS=90, UNITS=2;
+function pad(n){return (n<10?'0':'')+n;}
+function tick(){
+  var ms=Date.now()-QUIT, s=Math.floor(ms/1000);
+  var d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), ss=s%60;
+  cDays.textContent=d; cH.textContent=h; cM.textContent=pad(m); cS.textContent=pad(ss); streakTop.textContent=d;
+  stMoney.textContent='$'+(d*SPEND); stTime.textContent=Math.round(d*MINS/60)+'h'; stUnits.textContent=d*UNITS;
+}
+setInterval(tick,1000); tick();
+
+function show(id, btn){
+  document.querySelectorAll('.screen').forEach(function(e){e.classList.remove('active')});
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-n')===id)});
+  document.querySelector('.screenport').scrollTop=0;
+}
+var QUOTES=["“The man who moves a mountain begins by carrying away small stones.”","“You did not come this far to only come this far.”","“Fall seven times, stand up eight.”","“One day at a time. Today is the one that counts.”"];
+function takePledge(){
+  var q=document.getElementById('quote');
+  q.textContent=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  q.style.display='block';
+  var b=document.getElementById('pledgeBtn');
+  b.textContent='✓ Pledged for today'; b.classList.add('gold');
+}
+function openSOS(){document.getElementById('sos').classList.add('show');breatheLoop();}
+function closeSOS(){document.getElementById('sos').classList.remove('show');}
+function breatheLoop(){
+  var t=document.getElementById('breatheTxt'); var on=true;
+  if(window._bt)clearInterval(window._bt);
+  window._bt=setInterval(function(){t.textContent=on?'Breathe out…':'Breathe in…';on=!on;},4000);
+}
+function shared(b){document.getElementById('shareNote').textContent='Shared! (this is where WhatsApp / Instagram open)';b.textContent='✓ Shared';}
+function toggleCard(){
+  var sws=document.querySelectorAll('#s-card .sw');
+  document.getElementById('cardMoneyWrap').style.display=sws[0].classList.contains('on')?'block':'none';
+  document.getElementById('cardTimeWrap').style.display=sws[1].classList.contains('on')?'block':'none';
+}
+
+// charts
+var mood=[2,3,3,4,3,4,5], crave=[5,5,4,4,3,2,2], day=['M','T','W','T','F','S','S'];
+function bars(el,data,invert){
+  el.innerHTML='';
+  data.forEach(function(v,i){
+    var col=document.createElement('div');col.className='col';
+    var b=document.createElement('div');b.className='b'+((invert? v<=2 : v>=4)?' hi':'');
+    b.style.height=(v/5*100)+'%';
+    var x=document.createElement('div');x.className='x';x.textContent=day[i];
+    col.appendChild(b);col.appendChild(x);el.appendChild(col);
+  });
+}
+bars(document.getElementById('moodBars'),mood,false);
+bars(document.getElementById('craveBars'),crave,true);
+
+var cal=document.getElementById('cal');
+for(var i=1;i<=35;i++){var d=document.createElement('div');d.className='d'+(i<=33?' on':'');d.textContent=i<=33?'':'';cal.appendChild(d);}
+
+var MS=[{n:'1 day',d:'started',e:1},{n:'3 days',d:'',e:1},{n:'1 week',d:'',e:1},{n:'2 weeks',d:'',e:1},{n:'1 month',d:'earned',e:1},{n:'100 days',d:'67 to go',e:0},{n:'6 months',d:'locked',e:0},{n:'1 year',d:'locked',e:0},{n:'2 years',d:'locked',e:0}];
+var bg=document.getElementById('badges');
+MS.forEach(function(m){var el=document.createElement('div');el.className='badge '+(m.e?'earned':'locked');el.innerHTML='<div class="circ"><i class="ti ti-award"></i></div><div class="n">'+m.n+'</div><div class="s">'+m.d+'</div>';bg.appendChild(el);});
+</script>
+</body>
+</html>

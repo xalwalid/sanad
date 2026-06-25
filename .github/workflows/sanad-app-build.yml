@@ -1,0 +1,101 @@
+name: Sanad app build
+
+# Off-laptop builds only — Rakeeza standing rule. Never build/ship from a local machine.
+# Repo: github.com/xalwalid/sanad — this file sits at the repo root under
+# .github/workflows/, and the Flutter app lives at app/.
+#
+# The repo only commits lib/, assets/, pubspec, etc. — NOT the generated native
+# folders (android/ ios/). Each job runs `flutter create` to regenerate them, so
+# CI is self-sufficient and you never have to commit platform scaffolding.
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - "app/**"
+      - ".github/workflows/sanad-app-build.yml"
+  workflow_dispatch:
+
+env:
+  APP_DIR: app
+  FLUTTER_VERSION: "3.29.0"
+  ORG: ly.com.sanad
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - name: Generate native folders
+        run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
+        working-directory: ${{ env.APP_DIR }}
+      - run: rm -f test/widget_test.dart   # template test references a class we don't have
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter pub get
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter gen-l10n
+        working-directory: ${{ env.APP_DIR }}
+        continue-on-error: true
+      - run: flutter analyze
+        working-directory: ${{ env.APP_DIR }}
+
+  build-android:
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - name: Generate native folders
+        run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter pub get
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter gen-l10n
+        working-directory: ${{ env.APP_DIR }}
+        continue-on-error: true
+      # Installable APK for sideloading onto a phone right now. Default Flutter
+      # template debug-signs release builds, so it installs on any Android device
+      # with no Play Store and no signing setup.
+      - run: flutter build apk --release
+        working-directory: ${{ env.APP_DIR }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanad-apk
+          path: ${{ env.APP_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+      # Play Store bundle (for later publishing).
+      - run: flutter build appbundle --release
+        working-directory: ${{ env.APP_DIR }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanad-android-aab
+          path: ${{ env.APP_DIR }}/build/app/outputs/bundle/release/*.aab
+
+  build-ios:
+    needs: analyze-and-test
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - name: Generate native folders
+        run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter pub get
+        working-directory: ${{ env.APP_DIR }}
+      # Unsigned build to validate compilation. Real signing/TestFlight needs an
+      # Apple API key + certs in secrets (use fastlane match), then `flutter build ipa`.
+      - run: flutter build ios --release --no-codesign
+        working-directory: ${{ env.APP_DIR }}

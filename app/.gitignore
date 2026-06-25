@@ -1,0 +1,22 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Secrets — never commit. Use GitHub Actions secrets.
+**/key.properties
+**/*.keystore
+**/*.jks
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json

@@ -1,0 +1,128 @@
+{
+  "_note": "Original Sanad copy. Timelines informed by public withdrawal-recovery references; wording is our own. Supportive, never clinical, never shaming. See SPEC open question on sourcing before expanding.",
+  "cannabis": [
+    {
+      "week": 1,
+      "title": "The first few days are the steepest",
+      "body": "Cravings, irritability, trouble sleeping and a smaller appetite usually show up in the first day or two and tend to feel strongest around day three. This is your body recalibrating, not a sign you can't do this. Drink water, move a little, and keep your hands busy. Each hour you get through makes the next one easier."
+    },
+    {
+      "week": 2,
+      "title": "The fog starts to lift",
+      "body": "By the second week the sharpest physical symptoms ease off. Mood swings soften and most people start feeling steadier and more like themselves. Sleep and vivid dreams can still be unsettled — that's normal and it passes. Notice the small wins: a clearer morning, a craving that came and went."
+    },
+    {
+      "week": 4,
+      "title": "Finding your new normal",
+      "body": "Around the three-to-four week mark most people feel a real improvement. Sleep often takes a little longer to fully settle, so be patient with rough nights. The habit's grip is loosening — now it's about replacing old routines with ones that serve you."
+    },
+    {
+      "week": 8,
+      "title": "Protecting your progress",
+      "body": "The physical chapter is largely behind you; what remains is mostly the mental habit and the situations that used to trigger it. Keep an eye on stress and boredom, lean on your routine, and remember how far you've come whenever a craving visits."
+    }
+  ],
+  "cigarettes": [
+    {
+      "week": 1,
+      "title": "Your body is already healing",
+      "body": "Cravings, restlessness and irritability peak in the first three days as the nicotine clears. Cravings usually last only a few minutes — ride them out with water, a short walk, or slow breathing. Within days your sense of taste and smell begin to return."
+    },
+    {
+      "week": 2,
+      "title": "Cravings get shorter and rarer",
+      "body": "The physical pull fades through the second week. What's left is mostly the habit — the cigarette tied to coffee, the drive, the break. Plan a small replacement for those moments and the triggers lose their power."
+    },
+    {
+      "week": 4,
+      "title": "One month, real change",
+      "body": "By the end of the first month most physical withdrawal has faded and breathing and energy often feel better. Psychological cravings can still appear under stress — they're brief, and each one you pass strengthens you."
+    }
+  ],
+  "vaping": [
+    {
+      "week": 1,
+      "title": "The first days are the hardest",
+      "body": "Like other nicotine, cravings and irritability peak in the first few days and then begin to ease. Keep your hands and mouth busy — water, gum, a short walk — and treat each craving as a wave that crests and passes."
+    },
+    {
+      "week": 2,
+      "title": "Breaking the reach-for-it reflex",
+      "body": "Vaping is often an all-day reflex, so the second week is about noticing the automatic reach and choosing something else. The physical need keeps fading; the routine is what you're rewiring now."
+    },
+    {
+      "week": 4,
+      "title": "Lighter and freer",
+      "body": "After about a month the physical withdrawal is largely gone. Stay aware of stress triggers, and let the money and clarity you've gained remind you why this is worth it."
+    }
+  ],
+  "alcohol": [
+    {
+      "week": 1,
+      "title": "Be safe first",
+      "body": "The first days can bring shakiness, sweating, anxiety and poor sleep. For some people, especially heavy long-term drinkers, stopping suddenly can be genuinely dangerous. Take this week gently, stay hydrated, and don't go through it alone.",
+      "caution": "If you've been drinking heavily for a long time, please talk to a doctor before or while quitting. Severe alcohol withdrawal can cause seizures and can be life-threatening — medical support keeps you safe. If you feel confusion, fever, hallucinations or seizures, seek emergency care immediately."
+    },
+    {
+      "week": 2,
+      "title": "Things start to settle",
+      "body": "Most acute symptoms ease within the first week or so. Sleep and mood can stay up and down for a while longer — that's expected. You may already notice clearer mornings and steadier energy."
+    },
+    {
+      "week": 4,
+      "title": "The rewards show up",
+      "body": "By a few weeks in, many people see better sleep, steadier mood and clearer thinking. Cravings can still surface around old routines and stress — have a plan for those moments and keep leaning on support."
+    }
+  ],
+  "gambling": [
+    {
+      "week": 1,
+      "title": "Riding out the urge",
+      "body": "Early on the urge can feel loud, often tied to stress, boredom or being alone. Urges are intense but temporary — delay, distract, and put friction between you and access (block sites, hand over cards). Getting through the first week proves the urge passes."
+    },
+    {
+      "week": 2,
+      "title": "Rebuilding trust with yourself",
+      "body": "As the urges space out, focus shifts to the triggers and the money. Track what you're keeping, name the situations that tempt you, and replace them with something that genuinely occupies your mind."
+    },
+    {
+      "week": 4,
+      "title": "A steadier footing",
+      "body": "A month in, urges are usually less frequent and easier to ride out. Keep your safeguards in place and let the growing distance — and savings — reinforce the choice you keep making."
+    }
+  ],
+  "porn": [
+    {
+      "week": 1,
+      "title": "The urge is a wave",
+      "body": "Early urges can be strong and are often tied to stress, boredom or being alone at certain times. Change the pattern: move, get out of the room, message someone. Urges crest and fall — you don't have to act on them."
+    },
+    {
+      "week": 2,
+      "title": "Rewiring the routine",
+      "body": "The second week is about the triggers and the times of day the habit lived in. Fill those gaps deliberately. Each urge you let pass without acting weakens the loop a little more."
+    },
+    {
+      "week": 4,
+      "title": "More presence, more control",
+      "body": "By a month many people feel more focus and presence. Stay honest with yourself about triggers, keep your routines, and treat slips as information, not failure."
+    }
+  ],
+  "other": [
+    {
+      "week": 1,
+      "title": "The first days are the hardest",
+      "body": "Whatever you're quitting, the early days usually bring the strongest pull. Cravings and discomfort tend to peak early and then ease. Be patient and gentle with yourself — getting through the first week is real proof you can do this."
+    },
+    {
+      "week": 2,
+      "title": "It gets easier",
+      "body": "As the sharpest part passes, the focus moves to the habit and its triggers. Notice what sets off the urge and plan a different response. Small steady wins add up."
+    },
+    {
+      "week": 4,
+      "title": "Building your new normal",
+      "body": "A few weeks in, the new pattern starts to feel more natural. Keep your routines, lean on support, and remember that progress, not perfection, is the goal."
+    }
+  ]
+}

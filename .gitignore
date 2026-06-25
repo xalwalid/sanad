@@ -1,0 +1,39 @@
+# --- Flutter / Dart (app/) ---
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/pubspec.lock
+app/.idea/
+app/ios/
+app/android/
+app/macos/
+app/linux/
+app/windows/
+app/web/
+app/**/GeneratedPluginRegistrant.*
+app/**/*.g.dart
+app/**/*.iml
+
+# Generated native folders are recreated by CI (flutter create). Keep lib/ + assets/ only.
+
+# --- secrets / signing (never commit) ---
+**/key.properties
+**/*.keystore
+**/*.jks
+**/google-services.json
+**/GoogleService-Info.plist
+.env
+.env.*
+
+# --- design hand-off archive (the unpacked folder is kept; the zip is not) ---
+Recovery app design integration*.zip
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.tmp
+
+# --- helper scripts (local only) ---
+_push_to_github.bat
+_install_flutter.bat
