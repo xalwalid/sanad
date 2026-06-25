@@ -1,4 +1,4 @@
-/// On-device data models. None of this ever leaves the phone in Phase 1.
+// On-device data models. None of this ever leaves the phone in Phase 1.
 
 enum Habit {
   cannabis,

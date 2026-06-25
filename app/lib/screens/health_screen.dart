@@ -101,7 +101,7 @@ class _SemiGauge extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final stroke = 9.0;
+    const stroke = 9.0;
     final rect = Rect.fromLTWH(stroke / 2, stroke / 2, size.width - stroke, (size.height - stroke) * 2);
     final track = Paint()
       ..style = PaintingStyle.stroke

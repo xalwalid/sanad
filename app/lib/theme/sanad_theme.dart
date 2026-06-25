@@ -43,7 +43,7 @@ class SanadColors {
 
 class SanadTheme {
   // Cairo is bundled in assets/fonts/ (declared in pubspec) — fully offline.
-  static const String? fontFamily = 'Cairo';
+  static const String fontFamily = 'Cairo';
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(

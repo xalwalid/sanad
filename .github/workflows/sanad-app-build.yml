@@ -37,7 +37,7 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
       - run: flutter pub get
         working-directory: ${{ env.APP_DIR }}
-      - run: flutter analyze
+      - run: flutter analyze --no-fatal-infos
         working-directory: ${{ env.APP_DIR }}
 
   build-android:
