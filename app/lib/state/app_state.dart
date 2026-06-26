@@ -18,6 +18,9 @@ class AppState extends ChangeNotifier {
 
   Stats get stats => Stats(_profile!);
 
+  List<CheckIn> get checkIns => _store!.readCheckIns();
+  List<Relapse> get relapses => _store!.readRelapses();
+
   Future<void> load() async {
     _store = await LocalStore.open();
     _profile = _store!.readProfile();
@@ -68,6 +71,24 @@ class AppState extends ChangeNotifier {
     pledgedToday = false;
     await _store!.addRelapse(Relapse(date: DateTime.now(), note: note));
     await _store!.writeProfile(p);
+    notifyListeners();
+  }
+
+  /// Correct the quit date (editing, not relapse). Keeps history.
+  Future<void> setQuitDate(DateTime d) async {
+    final p = _profile!;
+    final current = stats.daysClean;
+    if (current > p.longestStreakDays) p.longestStreakDays = current;
+    p.quitDate = DateTime(d.year, d.month, d.day);
+    await _store!.writeProfile(p);
+    notifyListeners();
+  }
+
+  /// Delete the whole journey — wipes everything and returns to onboarding.
+  Future<void> deleteJourney() async {
+    await _store!.clearAll();
+    _profile = null;
+    pledgedToday = false;
     notifyListeners();
   }
 

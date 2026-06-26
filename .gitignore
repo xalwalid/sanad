@@ -44,5 +44,7 @@ _android_setup.bat
 _android_setup.txt
 _run_web.bat
 _run_android.bat
+_analyze.bat
+_analyze_log.txt
 _push_log.txt
 app/assets/.writetest

@@ -10,9 +10,8 @@ import '../data/strings.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 
-/// 30-day achievement / share card with full selective disclosure: the user can
-/// independently hide money, time, units, mass, AND the habit type — so they can
-/// share numbers without revealing what they're recovering from.
+/// Celebratory share card with full selective disclosure: hide money, time,
+/// units, mass, AND the habit type independently.
 class ShareCardScreen extends StatelessWidget {
   const ShareCardScreen({super.key});
   static final _boundary = GlobalKey();
@@ -29,6 +28,14 @@ class ShareCardScreen extends StatelessWidget {
     final cleanLine = p.showHabit
         ? S.cleanFrom.t(code).replaceFirst('{habit}', hu.name.t(code))
         : S.cleanPlain.t(code);
+
+    final chips = <Widget>[
+      if (p.showMoney && p.costOn) _chip('${s.money} $cur', S.mMoney.t(code)),
+      if (p.showTime && p.timeSetupOn) _chip('${s.timeH} ${S.unitHour.t(code)}', S.mTime.t(code)),
+      if (p.showUnits && p.usageOn) _chip('${s.units}', S.mAvoided.t(code)),
+      if (p.showMass && hu.massPer > 0)
+        _chip(hu.massRound == 0 ? '${s.cardMass.round()}' : s.cardMass.toStringAsFixed(1), hu.massLabel.t(code)),
+    ];
 
     Future<void> share() async {
       final b = _boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -53,36 +60,52 @@ class ShareCardScreen extends StatelessWidget {
           RepaintBoundary(
             key: _boundary,
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 34, horizontal: 22),
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 gradient: SanadColors.heroGradient,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
               ),
-              child: Column(
+              child: Stack(
                 children: [
-                  const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFDD91), size: 40),
-                  const SizedBox(height: 8),
-                  Text('${s.daysClean}',
-                      style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w800, height: 1)),
-                  const SizedBox(height: 2),
-                  Text(cleanLine, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 14)),
-                  const SizedBox(height: 18),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 26,
-                    runSpacing: 12,
-                    children: [
-                      if (p.showMoney && p.costOn) _cardStat('${s.money} $cur', S.mMoney.t(code)),
-                      if (p.showTime && p.timeSetupOn) _cardStat('${s.timeH} ${S.unitHour.t(code)}', S.mTime.t(code)),
-                      if (p.showUnits && p.usageOn) _cardStat('${s.units}', S.mAvoided.t(code)),
-                      if (p.showMass && hu.massPer > 0)
-                        _cardStat(
-                            hu.massRound == 0 ? '${s.cardMass.round()}' : s.cardMass.toStringAsFixed(1),
-                            hu.massLabel.t(code)),
-                    ],
+                  // decorative depth
+                  Positioned(top: -40, right: -30, child: _blob(140, 0.07)),
+                  Positioned(bottom: -50, left: -40, child: _blob(170, 0.06)),
+                  Positioned(
+                    bottom: 8, right: 10,
+                    child: Icon(Icons.eco, size: 90, color: Colors.white.withValues(alpha: 0.06)),
                   ),
-                  const SizedBox(height: 18),
-                  const Text('سند · sanad.com.ly', style: TextStyle(color: Color(0xFF9FCBB1), fontSize: 12)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 22),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60, height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE3B23C).withValues(alpha: 0.18),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFFFDD91), width: 1.5),
+                          ),
+                          child: const Icon(Icons.workspace_premium, color: Color(0xFFFFDD91), size: 30),
+                        ),
+                        const SizedBox(height: 12),
+                        Text('${s.daysClean}',
+                            style: const TextStyle(color: Colors.white, fontSize: 62, fontWeight: FontWeight.w800, height: 1)),
+                        Text(cleanLine, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 14)),
+                        const SizedBox(height: 18),
+                        if (chips.isNotEmpty)
+                          Wrap(alignment: WrapAlignment.center, spacing: 10, runSpacing: 10, children: chips),
+                        const SizedBox(height: 18),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/brand/sanad-mark-light.png', height: 16),
+                            const SizedBox(width: 8),
+                            const Text('سند · sanad.com.ly', style: TextStyle(color: Color(0xFF9FCBB1), fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -91,26 +114,33 @@ class ShareCardScreen extends StatelessWidget {
           _toggle(S.mMoney.t(code), p.showMoney, (v) => app.updateProfile((x) => x.showMoney = v)),
           _toggle(S.mTime.t(code), p.showTime, (v) => app.updateProfile((x) => x.showTime = v)),
           _toggle(S.mAvoided.t(code), p.showUnits, (v) => app.updateProfile((x) => x.showUnits = v)),
-          if (hu.massPer > 0)
-            _toggle(S.chMass.t(code), p.showMass, (v) => app.updateProfile((x) => x.showMass = v)),
+          if (hu.massPer > 0) _toggle(S.chMass.t(code), p.showMass, (v) => app.updateProfile((x) => x.showMass = v)),
           _toggle(S.chHabit.t(code), p.showHabit, (v) => app.updateProfile((x) => x.showHabit = v)),
           const SizedBox(height: 14),
-          FilledButton.icon(
-            icon: const Icon(Icons.ios_share),
-            label: Text(S.shareBtn.t(code)),
-            onPressed: share,
-          ),
+          FilledButton.icon(icon: const Icon(Icons.ios_share), label: Text(S.shareBtn.t(code)), onPressed: share),
         ],
       ),
     );
   }
 
-  Widget _cardStat(String v, String l) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(v, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
-          Text(l, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 11)),
-        ],
+  Widget _blob(double size, double alpha) => Container(
+        width: size, height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: alpha)),
+      );
+
+  Widget _chip(String v, String l) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.13),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(v, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+            Text(l, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 10)),
+          ],
+        ),
       );
 
   Widget _toggle(String label, bool on, ValueChanged<bool> onChanged) => Container(

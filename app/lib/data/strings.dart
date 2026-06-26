@@ -105,4 +105,64 @@ class S {
       'لحظة صعبة لا تمحو تقدّمك. إن كنت في أزمة، تواصل مع شخص تثق به الآن.',
       "A hard moment doesn't erase your progress. If you're in crisis, reach out to someone you trust now.");
   static const notMedical = L('سند ليس خدمة طبّية أو طارئة.', 'Sanad is not a medical or emergency service.');
+
+  // bottom nav
+  static const navHome = L('الرئيسية', 'Home');
+  static const navProgress = L('تقدّمك', 'Progress');
+  static const navRecovery = L('تعافيك', 'Recovery');
+  static const navCommunity = L('المجتمع', 'Community');
+  static const navMe = L('حسابي', 'Me');
+
+  // progress tab
+  static const progressTitle = L('تقدّمك', 'Your progress');
+  static const moodLast = L('المزاج آخر ٧ أيام', 'Mood, last 7 days');
+  static const cravingLast = L('الرغبة تضعف', 'Cravings easing');
+  static const checkinHistory = L('سجلّ تسجيلاتك', 'Your check-ins');
+  static const noCheckins = L('لا تسجيلات بعد. سجّل يومك من الرئيسية.', 'No check-ins yet. Log your day from Home.');
+  static const milestonesTitle = L('المعالم', 'Milestones');
+  static const moodLabel = L('المزاج', 'Mood');
+  static const cravingLabel = L('الرغبة', 'Craving');
+
+  // me tab
+  static const meTitle = L('حسابي', 'Me');
+  static const anonName = L('مجهول · مسافر', 'Anonymous · Traveler');
+  static const myReasons = L('لماذا أفعل هذا', 'Why I am doing this');
+  static const tracking = L('ما أتتبّعه', 'What I track');
+  static const editQuitDate = L('تعديل تاريخ البداية', 'Edit quit date');
+  static const editQuitDateSub = L('صحّح اليوم الذي بدأت فيه', 'Correct the day you started');
+  static const relapseReset = L('سجّل انتكاسة', 'Log a relapse');
+  static const relapseResetSub = L('بداية جديدة — مع حفظ سجلّك', 'A fresh start — your history is kept');
+  static const deleteJourney = L('حذف الرحلة', 'Delete journey');
+  static const deleteJourneySub = L('يمسح كل بياناتك ويبدأ من جديد', 'Erases all your data and starts over');
+  static const deleteConfirmTitle = L('حذف رحلتك؟', 'Delete your journey?');
+  static const deleteConfirmBody = L('سيُمسح تاريخ بدايتك وتسجيلاتك وكل تقدّمك نهائيًا. لا يمكن التراجع.',
+      'Your quit date, check-ins and all progress will be permanently erased. This cannot be undone.');
+  static const cancel = L('إلغاء', 'Cancel');
+  static const deleteConfirmYes = L('نعم، احذف', 'Yes, delete');
+  static const onDevice = L('كل شيء على هذا الجهاز', 'Everything is on this phone');
+  static const onDeviceSub = L('بلا حساب. لا شيء يُرفع.', 'No account. Nothing uploaded.');
+  static const backupTitle = L('نسخة احتياطية برمز', 'Back up with a code');
+  static const backupSub = L('استعد على هاتف جديد، بلا تسجيل دخول', 'Restore on a new phone, no sign-in');
+  static const languageLabel = L('اللغة', 'Language');
+
+  // recovery / health
+  static const youAreIn = L('أنت في مرحلة', 'You are in');
+  static const phaseStart = L('البداية', 'Start');
+  static const phaseWeek1 = L('الأسبوع الأول', 'First week');
+  static const phaseClarity = L('مرحلة الصفاء', 'Clarity');
+  static const phaseStabilize = L('الاستقرار', 'Stabilizing');
+  static const phaseDeep = L('التعافي العميق', 'Deep recovery');
+  static const curveRecovery = L('التعافي', 'Recovery');
+  static const curveSymptoms = L('شدّة الأعراض', 'Symptoms');
+  static const youAreHere = L('أنت هنا', 'You are here');
+  static const axisStart = L('البداية', 'Start');
+  static const axisTwoWeeks = L('أسبوعان', '2 wks');
+  static const axisMonth = L('شهر', '1 mo');
+  static const axisSixWeeks = L('٦ أسابيع', '6 wks');
+  static const axisTwoMonths = L('شهران', '2 mo');
+
+  // community
+  static const communityTitle = L('المجتمع', 'Community');
+  static const communitySoon = L('مجتمع مجهول — قريبًا', 'Anonymous community — coming soon');
+  static const communitySoonSub = L('بلا أسماء، بلا وجوه. فقط ناس يفهمونك.', 'No names, no faces. Just people who get it.');
 }

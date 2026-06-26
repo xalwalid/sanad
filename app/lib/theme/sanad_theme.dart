@@ -21,6 +21,8 @@ class SanadColors {
   static const trackOff = Color(0xFFD8D2C2);
 
   static const accent = Color(0xFF517F5C); // success/accent
+  static const danger = Color(0xFFA32D2D); // destructive (delete)
+  static const mid = Color(0xFF3B7A57); // mid green (avatars, soft accents)
   static const ringA = Color(0xFFC7D6C5);
   static const ringB = Color(0xFF8FAF98);
 

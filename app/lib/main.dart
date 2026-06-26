@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'theme/sanad_theme.dart';
 import 'state/app_state.dart';
 import 'screens/onboarding_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/root_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +36,7 @@ class SanadApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             // Directionality follows the locale automatically (RTL for ar).
-            home: app.hasProfile ? const HomeScreen() : const OnboardingScreen(),
+            home: app.hasProfile ? const RootShell() : const OnboardingScreen(),
           );
         },
       ),

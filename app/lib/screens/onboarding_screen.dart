@@ -6,7 +6,7 @@ import '../models/models.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import '../widgets/calendar.dart';
-import 'home_screen.dart';
+import 'root_shell.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -69,7 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
     context.read<AppState>().createProfile(p);
     Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()));
+        MaterialPageRoute(builder: (_) => const RootShell()));
   }
 
   @override

@@ -31,6 +31,13 @@ class LocalStore {
 
   Future<void> clearProfile() => _prefs.remove(_kProfile);
 
+  /// Wipe everything — the user's full journey. Used by "delete journey".
+  Future<void> clearAll() async {
+    await _prefs.remove(_kProfile);
+    await _prefs.remove(_kCheckins);
+    await _prefs.remove(_kRelapses);
+  }
+
   // ---- check-ins ----
   List<CheckIn> readCheckIns() {
     final raw = _prefs.getStringList(_kCheckins) ?? [];
