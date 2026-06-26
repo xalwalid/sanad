@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
+import '../logic/calculations.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import '../widgets/progress_ring.dart';
