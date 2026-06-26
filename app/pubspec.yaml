@@ -19,12 +19,31 @@ dependencies:
 
 dev_dependencies:
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
+
+# App icon — generated into the native folders by CI (dart run flutter_launcher_icons).
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/brand/sanad-logo.png"
+  adaptive_icon_background: "#F3F0E8"
+  adaptive_icon_foreground: "assets/brand/sanad-logo.png"
+
+# Launch splash — cream background with the Sanad logo.
+flutter_native_splash:
+  color: "#F3F0E8"
+  image: assets/brand/sanad-logo.png
+  android_12:
+    color: "#F3F0E8"
+    image: assets/brand/sanad-logo.png
 
 flutter:
   uses-material-design: true
   generate: true
   assets:
     - assets/content/
+    - assets/brand/
 
   # Offline-first: Cairo is bundled, so the app never needs the network for type.
   fonts:

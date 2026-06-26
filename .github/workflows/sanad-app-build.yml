@@ -58,6 +58,11 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
       - run: flutter pub get
         working-directory: ${{ env.APP_DIR }}
+      # Brand the app: generate launcher icon + splash into the fresh native folders.
+      - run: dart run flutter_launcher_icons
+        working-directory: ${{ env.APP_DIR }}
+      - run: dart run flutter_native_splash:create
+        working-directory: ${{ env.APP_DIR }}
       # Installable APK for sideloading onto a phone right now. Default Flutter
       # template debug-signs release builds, so it installs on any Android device
       # with no Play Store and no signing setup.

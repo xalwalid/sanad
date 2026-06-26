@@ -133,26 +133,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const Spacer(),
           Container(
             width: 236,
-            padding: const EdgeInsets.symmetric(vertical: 34),
+            padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(30),
               boxShadow: SanadTheme.cardShadow,
             ),
-            child: const Column(
-              children: [
-                Text('سند',
-                    style: TextStyle(
-                        fontSize: 44,
-                        fontWeight: FontWeight.w800,
-                        color: SanadColors.primary)),
-                Text('SANAD',
-                    style: TextStyle(
-                        fontSize: 13,
-                        letterSpacing: 4,
-                        color: SanadColors.textSecondary)),
-              ],
-            ),
+            child: Image.asset('assets/brand/sanad-logo.png', width: 180),
           ),
           const SizedBox(height: 28),
           Text(tr(S.welcomeTitle),

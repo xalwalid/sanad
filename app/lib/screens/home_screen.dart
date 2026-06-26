@@ -47,104 +47,117 @@ class _HomeScreenState extends State<HomeScreen> {
     final h = since.inHours % 24, m = since.inMinutes % 60, sec = since.inSeconds % 60;
 
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // hero
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 56, 20, 26),
-            decoration: const BoxDecoration(
-              gradient: SanadColors.heroGradient,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-            ),
-            child: Column(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+          children: [
+            // header row: mark + language + settings
+            Row(
               children: [
-                Row(
-                  children: [
-                    const Text('سند',
-                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
-                    const Spacer(),
-                    IconButton(
-                      icon: Text(code == 'ar' ? 'EN' : 'ع',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                      onPressed: () => app.toggleLocale(),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                      onPressed: () => _openSettings(context, app),
-                    ),
-                  ],
+                Image.asset('assets/brand/sanad-mark.png', height: 26),
+                const Spacer(),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: Text(code == 'ar' ? 'EN' : 'ع',
+                      style: const TextStyle(color: SanadColors.primary, fontWeight: FontWeight.w700)),
+                  onPressed: () => app.toggleLocale(),
                 ),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tr(S.greeting), style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 14)),
-                      Text(S.quittingFrom.t(code).replaceFirst('{habit}', habitName),
-                          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                ProgressRing(
-                  progress: s.ringProgress,
-                  size: 210,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('${s.daysClean}',
-                          style: const TextStyle(color: Colors.white, fontSize: 72, fontWeight: FontWeight.w800, height: 1)),
-                      Text(tr(S.daysClean), style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 13)),
-                      const SizedBox(height: 6),
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Text('${two(h)}:${two(m)}:${two(sec)}',
-                            style: const TextStyle(color: Colors.white, fontSize: 15, fontFeatures: [FontFeature.tabularFigures()])),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  '${tr(S.nextMilestone)} — ${S.remains.t(code).replaceFirst('{n}', '${s.daysToNext}').replaceFirst('{m}', '${s.nextMilestone}')}',
-                  style: const TextStyle(color: Color(0xFFD7EDE0), fontSize: 12.5),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.settings_outlined, color: SanadColors.heading),
+                  onPressed: () => _openSettings(context, app),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 6),
+            // greeting
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tr(S.greeting),
+                      style: const TextStyle(color: SanadColors.textSecondary, fontSize: 14)),
+                  Text(S.quittingFrom.t(code).replaceFirst('{habit}', habitName),
+                      style: const TextStyle(
+                          color: SanadColors.heading, fontSize: 19, fontWeight: FontWeight.w800)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-            child: Column(
-              children: [
-                _pledge(app, code),
-                const SizedBox(height: 12),
-                _checkinCta(context, code),
-                const SizedBox(height: 16),
-                _statsGrid(s, p, code),
-                const SizedBox(height: 14),
-                _recoveryBanner(context, code),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.ios_share, color: SanadColors.primary),
-                  label: Text(tr(S.shareMilestone), style: const TextStyle(color: SanadColors.primary)),
-                  style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(54),
-                      side: const BorderSide(color: SanadColors.ringB),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
-                  onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ShareCardScreen())),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const RelapseScreen())),
-                  child: Text(tr(S.logRelapse), style: const TextStyle(color: SanadColors.textSecondary)),
-                ),
-              ],
+            // sober-clock card
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 18),
+              decoration: BoxDecoration(
+                gradient: SanadColors.heroGradient,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: SanadTheme.cardShadow,
+              ),
+              child: Column(
+                children: [
+                  ProgressRing(
+                    progress: s.ringProgress,
+                    size: 220,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${s.daysClean}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 78,
+                                fontWeight: FontWeight.w800,
+                                height: 1)),
+                        Text(tr(S.daysClean),
+                            style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 13)),
+                        const SizedBox(height: 8),
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Text('${two(h)}:${two(m)}:${two(sec)}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFeatures: [FontFeature.tabularFigures()])),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${tr(S.nextMilestone)} — ${S.remains.t(code).replaceFirst('{n}', '${s.daysToNext}').replaceFirst('{m}', '${s.nextMilestone}')}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Color(0xFFD7EDE0), fontSize: 12.5),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+
+            _pledge(app, code),
+            const SizedBox(height: 12),
+            _checkinCta(context, code),
+            const SizedBox(height: 16),
+            _statsGrid(s, p, code),
+            const SizedBox(height: 14),
+            _recoveryBanner(context, code),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.ios_share, color: SanadColors.primary),
+              label: Text(tr(S.shareMilestone), style: const TextStyle(color: SanadColors.primary)),
+              style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(54),
+                  side: const BorderSide(color: SanadColors.ringB),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ShareCardScreen())),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const RelapseScreen())),
+              child: Text(tr(S.logRelapse), style: const TextStyle(color: SanadColors.textSecondary)),
+            ),
+          ],
+        ),
       ),
     );
   }

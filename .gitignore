@@ -38,5 +38,11 @@ Thumbs.db
 _push_to_github.bat
 _push_update.bat
 _install_flutter.bat
+_flutter_verify.bat
+_flutter_doctor.txt
+_android_setup.bat
+_android_setup.txt
+_run_web.bat
+_run_android.bat
 _push_log.txt
 app/assets/.writetest
