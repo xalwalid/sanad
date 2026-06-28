@@ -37,6 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _usageOn = true;
   String _method = 'joint';
   int _usageAmount = 3;
+  final _customName = TextEditingController();
 
   String get code => context.read<AppState>().lang;
   String tr(L l) => l.t(code);
@@ -57,6 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _finish() {
     final p = RecoveryProfile(
       habit: _habit,
+      customName: _habit == Habit.other ? _customName.text.trim() : null,
       quitDate: _quit,
       costOn: _costOn,
       costPeriod: _period,
@@ -186,7 +188,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 26),
-            children: Habit.values.map((h) {
+            children: [
+              ...Habit.values.map((h) {
               final on = h == _habit;
               return GestureDetector(
                 onTap: () => setState(() {
@@ -219,7 +222,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               );
-            }).toList(),
+              }),
+              if (_habit == Habit.other)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2, bottom: 10),
+                  child: TextField(
+                    controller: _customName,
+                    decoration: InputDecoration(
+                      labelText: tr(S.customHabitPrompt),
+                      hintText: tr(S.customHabitHint),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         Padding(

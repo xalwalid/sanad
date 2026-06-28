@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/local_store.dart';
 import '../models/models.dart';
 import '../logic/calculations.dart';
+import '../logic/recovery_content.dart';
 
 /// Single source of app truth. Wraps the on-device store and notifies the UI.
 class AppState extends ChangeNotifier {
@@ -22,6 +23,7 @@ class AppState extends ChangeNotifier {
   List<Relapse> get relapses => _store!.readRelapses();
 
   Future<void> load() async {
+    await RecoveryContent.instance.load();
     _store = await LocalStore.open();
     _profile = _store!.readProfile();
     final loc = _store!.readLocale();

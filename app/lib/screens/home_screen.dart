@@ -9,6 +9,7 @@ import '../theme/sanad_theme.dart';
 import '../widgets/progress_ring.dart';
 import 'checkin_screen.dart';
 import 'milestone_card_screen.dart';
+import 'sos_screen.dart';
 
 /// Home tab body (no Scaffold — RootShell provides it).
 class HomeTab extends StatefulWidget {
@@ -46,7 +47,7 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
     String tr(L l) => l.t(code);
     final s = app.stats;
     final p = app.profile!;
-    final habitName = tr(habitCatalog[p.habit]!.name);
+    final habitName = habitTitle(p, code);
 
     final since = DateTime.now().difference(p.quitDate);
     final h = since.inHours % 24, m = since.inMinutes % 60, sec = since.inSeconds % 60;
@@ -84,6 +85,8 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
           _clockCard(s, tr, code, h, m, sec),
           const SizedBox(height: 14),
           _pledge(app, code),
+          const SizedBox(height: 12),
+          _sosButton(context, code),
           const SizedBox(height: 12),
           _checkinCta(context, code),
           const SizedBox(height: 16),
@@ -191,6 +194,33 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _sosButton(BuildContext context, String code) => GestureDetector(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SosScreen())),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [SanadColors.sos1, SanadColors.sos2]),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.self_improvement, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(S.sosCue.t(code), style: const TextStyle(color: Color(0xFFFFE7D6), fontSize: 12)),
+                    Text(S.sosButton.t(code), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.white70),
+            ],
+          ),
+        ),
+      );
 
   Widget _checkinCta(BuildContext context, String code) => GestureDetector(
         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CheckInScreen())),

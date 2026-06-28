@@ -15,6 +15,8 @@ class S {
   static const back = L('رجوع', 'Back');
 
   static const habitTitle = L('ما الذي تريد الإقلاع عنه؟', 'What do you want to quit?');
+  static const customHabitPrompt = L('اكتب ما تحاول الإقلاع عنه', "Name what you're quitting");
+  static const customHabitHint = L('مثال: السكّر، الألعاب، التسوّق…', 'e.g. sugar, gaming, shopping…');
   static const dateTitle = L('متى بدأت رحلتك؟', 'When did your journey begin?');
   static const dateToday = L('أبدأ اليوم', 'I start today');
   static const datePast = L('أقلعت منذ مدة', 'I quit a while ago');
@@ -155,6 +157,24 @@ class S {
   static const curveRecovery = L('التعافي', 'Recovery');
   static const curveSymptoms = L('شدّة الأعراض', 'Symptoms');
   static const youAreHere = L('أنت هنا', 'You are here');
+  static const expectThisWeek = L('ماذا تتوقّع هذا الأسبوع', 'What to expect this week');
+  static const peopleFeel = L('ما يشعر به كثيرون', 'What people commonly feel');
+  static const aWord = L('كلمة دعم', 'A word of support');
+  static const indicatorsTitle = L('مؤشّرات التعافي', 'Recovery indicators');
+  static const fullJourney = L('رحلة التعافي كاملة', 'The full recovery journey');
+  static const nowTag = L('الآن', 'Now');
+  static const sourcesTitle = L('المصادر', 'Sources');
+
+  // SOS breathing
+  static const sosCue = L('أشعر برغبة الآن', 'Feeling a craving?');
+  static const sosButton = L('تنفّس — تجاوز الرغبة', 'Breathe — ride the wave');
+  static const sosTitle = L('تجاوز الموجة', 'Ride the wave');
+  static const sosSub = L('الرغبة موجة تمرّ خلال دقائق. تنفّس معنا حتى تهدأ.', 'A craving is a wave that passes in minutes. Breathe with us until it eases.');
+  static const breatheIn = L('شهيق…', 'Breathe in…');
+  static const breatheHold = L('احبس…', 'Hold…');
+  static const breatheOut = L('زفير…', 'Breathe out…');
+  static const imOkay = L('أنا بخير الآن', "I'm okay now");
+  static const sosReassure = L('أنت أقوى من هذه اللحظة.', "You're stronger than this moment.");
   static const axisStart = L('البداية', 'Start');
   static const axisTwoWeeks = L('أسبوعان', '2 wks');
   static const axisMonth = L('شهر', '1 mo');

@@ -20,6 +20,7 @@ enum CostPeriod { daily, weekly, hourly, perUse }
 class RecoveryProfile {
   RecoveryProfile({
     required this.habit,
+    this.customName,
     required this.quitDate,
     this.longestStreakDays = 0,
     this.countryCode = 'LY',
@@ -44,6 +45,7 @@ class RecoveryProfile {
   });
 
   Habit habit;
+  String? customName; // user-typed name when habit == other
   DateTime quitDate;
   int longestStreakDays;
   String countryCode;
@@ -62,6 +64,7 @@ class RecoveryProfile {
 
   Map<String, dynamic> toJson() => {
         'habit': habit.id,
+        'customName': customName,
         'quitDate': quitDate.toIso8601String(),
         'longestStreakDays': longestStreakDays,
         'countryCode': countryCode,
@@ -83,6 +86,7 @@ class RecoveryProfile {
 
   factory RecoveryProfile.fromJson(Map<String, dynamic> j) => RecoveryProfile(
         habit: Habit.fromId(j['habit'] as String),
+        customName: j['customName'] as String?,
         quitDate: DateTime.parse(j['quitDate'] as String),
         longestStreakDays: (j['longestStreakDays'] as int?) ?? 0,
         countryCode: (j['countryCode'] as String?) ?? 'LY',

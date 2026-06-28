@@ -30,6 +30,14 @@ class HabitInfo {
 
 const milestones = [7, 30, 100, 365];
 
+/// Display name for a profile's habit — the user's typed name for 'other'.
+String habitTitle(RecoveryProfile p, String code) {
+  if (p.habit == Habit.other && (p.customName?.trim().isNotEmpty ?? false)) {
+    return p.customName!.trim();
+  }
+  return habitCatalog[p.habit]!.name.t(code);
+}
+
 const Map<Habit, HabitInfo> habitCatalog = {
   Habit.cannabis: HabitInfo(
     habit: Habit.cannabis,
@@ -76,7 +84,7 @@ const Map<Habit, HabitInfo> habitCatalog = {
   ),
   Habit.other: HabitInfo(
     habit: Habit.other,
-    name: L('العادة', 'the habit'),
+    name: L('عادة أخرى', 'Other habit'),
     unitWord: L('مرّة', 'time'),
     massPer: 0,
     massLabel: L('', ''),

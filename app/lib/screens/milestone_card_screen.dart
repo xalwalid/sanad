@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
+import '../logic/recovery_content.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 
@@ -22,11 +23,12 @@ class ShareCardScreen extends StatelessWidget {
     final code = app.lang;
     final s = app.stats;
     final p = app.profile!;
-    final hu = habitCatalog[p.habit]!;
+    final hu = RecoveryContent.instance.forHabit(p.habit.id);
     final cur = code == 'ar' ? 'د.ل' : 'LYD';
+    final massVal = hu.massPer * s.cardUnits;
 
     final cleanLine = p.showHabit
-        ? S.cleanFrom.t(code).replaceFirst('{habit}', hu.name.t(code))
+        ? S.cleanFrom.t(code).replaceFirst('{habit}', habitTitle(p, code))
         : S.cleanPlain.t(code);
 
     final chips = <Widget>[
@@ -34,7 +36,7 @@ class ShareCardScreen extends StatelessWidget {
       if (p.showTime && p.timeSetupOn) _chip('${s.timeH} ${S.unitHour.t(code)}', S.mTime.t(code)),
       if (p.showUnits && p.usageOn) _chip('${s.units}', S.mAvoided.t(code)),
       if (p.showMass && hu.massPer > 0)
-        _chip(hu.massRound == 0 ? '${s.cardMass.round()}' : s.cardMass.toStringAsFixed(1), hu.massLabel.t(code)),
+        _chip(hu.massRound == 0 ? '${massVal.round()}' : massVal.toStringAsFixed(1), hu.massLabel.t(code)),
     ];
 
     Future<void> share() async {

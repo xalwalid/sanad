@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import 'relapse_screen.dart';
 import 'crisis_screen.dart';
+import 'sos_screen.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -59,7 +60,7 @@ class MeScreen extends StatelessWidget {
           _tile(Icons.savings_outlined, S.mMoney.t(code), '${s.money} $cur', null),
 
           _section(tr(S.tracking)),
-          _tile(_habitIcons[p.habit], tr(habitCatalog[p.habit]!.name),
+          _tile(_habitIcons[p.habit], habitTitle(p, code),
               '${s.daysClean} ${S.unitDay.t(code)}', null),
           _tile(Icons.event_outlined, tr(S.editQuitDate), tr(S.editQuitDateSub),
               () => _editDate(context, app)),
@@ -77,6 +78,9 @@ class MeScreen extends StatelessWidget {
               () => app.toggleLocale()),
 
           _section(code == 'ar' ? 'الدعم' : 'Support'),
+          _tile(Icons.self_improvement, tr(S.sosButton), tr(S.sosCue),
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SosScreen())),
+              accent: SanadColors.sos2),
           _tile(Icons.support_outlined, tr(S.needSupport), tr(S.crisisTitle),
               () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CrisisScreen())),
               accent: SanadColors.sos2),

@@ -4,7 +4,7 @@ import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
-import 'crisis_screen.dart';
+import 'sos_screen.dart';
 
 /// Compassionate reset — never "failure". Keeps longest streak + history.
 class RelapseScreen extends StatelessWidget {
@@ -57,7 +57,7 @@ class RelapseScreen extends StatelessWidget {
               TextButton.icon(
                 icon: const Icon(Icons.support_outlined, color: SanadColors.sos2, size: 18),
                 label: Text(tr(S.needSupport), style: const TextStyle(color: SanadColors.sos2)),
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CrisisScreen())),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SosScreen())),
               ),
             ],
           ),

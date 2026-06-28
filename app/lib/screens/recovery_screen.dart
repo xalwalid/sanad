@@ -2,34 +2,21 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/strings.dart';
-import '../logic/calculations.dart';
+import '../logic/recovery_content.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 
 class RecoveryScreen extends StatelessWidget {
   const RecoveryScreen({super.key});
 
-  String _phase(String key, String code) {
-    switch (key) {
-      case 'start':
-        return S.phaseStart.t(code);
-      case 'week1':
-        return S.phaseWeek1.t(code);
-      case 'clarity':
-        return S.phaseClarity.t(code);
-      case 'stabilize':
-        return S.phaseStabilize.t(code);
-      default:
-        return S.phaseDeep.t(code);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     final code = app.lang;
-    final s = app.stats;
-    final gauges = s.healthGauges();
+    final days = app.stats.daysClean;
+    final c = RecoveryContent.instance.forHabit(app.profile!.habit.id);
+    final week = c.weekFor(days);
+    final healed = c.indicators.where((i) => days >= i.full).length;
 
     return SafeArea(
       bottom: false,
@@ -39,24 +26,71 @@ class RecoveryScreen extends StatelessWidget {
           Text(S.healthTitle.t(code),
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: SanadColors.heading)),
           const SizedBox(height: 12),
-          // phase header — where you are now
+
+          // phase / current-week header
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(gradient: SanadColors.heroGradient, borderRadius: BorderRadius.circular(20)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${S.youAreIn.t(code)}: ${_phase(s.phaseKey, code)}',
+                Text('${S.youAreIn.t(code)}: ${week.label.t(code)}',
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
                 const SizedBox(height: 4),
                 Text(
-                  S.healedSummary.t(code).replaceFirst('{x}', '${s.fullyHealed}').replaceFirst('{y}', '${gauges.length}'),
+                  S.healedSummary.t(code).replaceFirst('{x}', '$healed').replaceFirst('{y}', '${c.indicators.length}'),
                   style: const TextStyle(color: Color(0xFFD7EDE0), fontSize: 12.5),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          if (c.caution != null) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: const Color(0xFFFBECEC), borderRadius: BorderRadius.circular(16)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: SanadColors.danger, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(c.caution!.t(code), style: const TextStyle(color: SanadColors.danger, height: 1.45))),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // current week panel
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: SanadColors.border)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _para(Icons.visibility_outlined, S.expectThisWeek.t(code), week.expect.t(code)),
+                const SizedBox(height: 12),
+                _para(Icons.groups_outlined, S.peopleFeel.t(code), week.feel.t(code)),
+                const SizedBox(height: 12),
+                _para(Icons.favorite_outline, S.aWord.t(code), week.support.t(code)),
+                const SizedBox(height: 14),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.menu_book_outlined, size: 18),
+                    label: Text(S.readMore.t(code)),
+                    onPressed: () => _openReadMore(context, c, code, days),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          Text(S.indicatorsTitle.t(code),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: SanadColors.textSecondary)),
+          const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -64,54 +98,141 @@ class RecoveryScreen extends StatelessWidget {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             childAspectRatio: 0.95,
-            children: gauges.map((g) => _GaugeCard(g, code)).toList(),
+            children: c.indicators.map((ind) => _GaugeCard(ind, days, c, code)).toList(),
           ),
         ],
       ),
     );
   }
+
+  Widget _para(IconData icon, String title, String body) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [Icon(icon, size: 18, color: SanadColors.primary), const SizedBox(width: 8),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: SanadColors.heading))]),
+          const SizedBox(height: 4),
+          Text(body, style: const TextStyle(height: 1.55, color: SanadColors.body)),
+        ],
+      );
+
+  void _openReadMore(BuildContext context, HabitContent c, String code, int days) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: SanadColors.page,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        builder: (_, ctrl) => ListView(
+          controller: ctrl,
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          children: [
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: SanadColors.border, borderRadius: BorderRadius.circular(2)))),
+            const SizedBox(height: 14),
+            Text(S.fullJourney.t(code), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: SanadColors.heading)),
+            const SizedBox(height: 12),
+            ...c.weeks.map((w) {
+              final current = days >= w.fromDay && days <= w.toDay;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: current ? SanadColors.primary : SanadColors.border, width: current ? 1.5 : 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Text(w.label.t(code), style: const TextStyle(fontWeight: FontWeight.w800, color: SanadColors.heading)),
+                      if (current) ...[const SizedBox(width: 8), _nowBadge(code)],
+                    ]),
+                    const SizedBox(height: 6),
+                    Text(w.expect.t(code), style: const TextStyle(height: 1.5, color: SanadColors.body)),
+                    const SizedBox(height: 6),
+                    Text(w.feel.t(code), style: const TextStyle(height: 1.5, color: SanadColors.textSecondary)),
+                    const SizedBox(height: 6),
+                    Text(w.support.t(code), style: const TextStyle(height: 1.5, color: SanadColors.primary, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            _sources(c, code),
+            const SizedBox(height: 10),
+            Text(S.notMedical.t(code), style: const TextStyle(fontSize: 12, color: SanadColors.textSecondary)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _nowBadge(String code) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(color: SanadColors.selectedTint, borderRadius: BorderRadius.circular(8)),
+        child: Text(S.nowTag.t(code), style: const TextStyle(fontSize: 10, color: SanadColors.primary, fontWeight: FontWeight.w700)),
+      );
+
+  static Widget _sources(HabitContent c, String code) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(S.sourcesTitle.t(code), style: const TextStyle(fontWeight: FontWeight.w700, color: SanadColors.heading, fontSize: 13)),
+          const SizedBox(height: 6),
+          ...c.sources.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text('• ${s.label}\n  ${s.url}',
+                    style: const TextStyle(fontSize: 11, color: SanadColors.textSecondary, height: 1.4)),
+              )),
+        ],
+      );
 }
 
 class _GaugeCard extends StatelessWidget {
-  const _GaugeCard(this.g, this.code);
-  final HealthGauge g;
+  const _GaugeCard(this.ind, this.days, this.content, this.code);
+  final IndicatorInfo ind;
+  final int days;
+  final HabitContent content;
   final String code;
 
   @override
   Widget build(BuildContext context) {
+    final value = ((days / ind.full) * 100).round().clamp(0, 100);
+    final remaining = (ind.full - days) < 0 ? 0 : (ind.full - days);
+    final done = remaining == 0;
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => HealthDetailScreen(gauge: g))),
+      onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => IndicatorDetailScreen(ind: ind, days: days, content: content))),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: g.def.tint,
+          color: ind.color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: g.done ? g.def.color : SanadColors.border),
+          border: Border.all(color: done ? ind.color : SanadColors.border),
         ),
         child: Column(
           children: [
-            Text(g.def.name.t(code), style: TextStyle(fontWeight: FontWeight.w700, color: g.def.color)),
+            Text(ind.name.t(code), textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w700, color: ind.color)),
             const SizedBox(height: 6),
             SizedBox(
-              width: 110,
-              height: 64,
+              width: 110, height: 64,
               child: CustomPaint(
-                painter: _SemiGauge(g.value / 100, g.def.color),
+                painter: _SemiGauge(value / 100, ind.color),
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 18),
-                    child: Text('${g.value}%',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: g.def.color)),
+                    child: Text('$value%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ind.color)),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              g.done ? '${S.completeMark.t(code)} ✓' : S.remainingDays.t(code).replaceFirst('{n}', '${g.remaining}'),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: g.done ? g.def.color : SanadColors.textSecondary),
-            ),
+            Text(done ? '${S.completeMark.t(code)} ✓' : S.remainingDays.t(code).replaceFirst('{n}', '$remaining'),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: done ? ind.color : SanadColors.textSecondary)),
           ],
         ),
       ),
@@ -137,68 +258,58 @@ class _SemiGauge extends CustomPainter {
   bool shouldRepaint(_SemiGauge o) => o.t != t;
 }
 
-class HealthDetailScreen extends StatelessWidget {
-  const HealthDetailScreen({super.key, required this.gauge});
-  final HealthGauge gauge;
+class IndicatorDetailScreen extends StatelessWidget {
+  const IndicatorDetailScreen({super.key, required this.ind, required this.days, required this.content});
+  final IndicatorInfo ind;
+  final int days;
+  final HabitContent content;
 
   @override
   Widget build(BuildContext context) {
-    final app = context.watch<AppState>();
-    final code = app.lang;
-    final d = gauge.def;
-    final daysClean = app.stats.daysClean;
-
+    final code = context.watch<AppState>().lang;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: SanadColors.heading,
         elevation: 0,
-        title: Text(d.name.t(code), style: const TextStyle(fontWeight: FontWeight.w800)),
+        title: Text(ind.name.t(code), style: const TextStyle(fontWeight: FontWeight.w800)),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         children: [
-          // legend
-          Row(
-            children: [
-              _legend(d.color, S.curveRecovery.t(code)),
-              const SizedBox(width: 16),
-              _legend(SanadColors.sos2, S.curveSymptoms.t(code)),
-            ],
-          ),
+          Row(children: [
+            _legend(ind.color, S.curveRecovery.t(code)),
+            const SizedBox(width: 16),
+            _legend(SanadColors.sos2, S.curveSymptoms.t(code)),
+          ]),
           const SizedBox(height: 10),
           Container(
             height: 190,
             padding: const EdgeInsets.fromLTRB(6, 10, 6, 6),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: SanadColors.border)),
             child: CustomPaint(
-              painter: _RecoveryCurve(
-                full: d.full.toDouble(),
-                daysClean: daysClean,
-                color: d.color,
-                code: code,
-              ),
+              painter: _RecoveryCurve(full: ind.full.toDouble(), daysClean: days, color: ind.color, code: code),
               size: Size.infinite,
             ),
           ),
           const SizedBox(height: 18),
-          _block(S.alreadyHealed.t(code), d.done.t(code), Icons.check_circle, d.color),
-          _block(S.healingNow.t(code), d.now.t(code), Icons.autorenew, d.color),
-          _block(S.whatsComing.t(code), d.coming.t(code), Icons.north_east, d.color),
-          const SizedBox(height: 8),
+          _block(S.alreadyHealed.t(code), ind.done.t(code), Icons.check_circle, ind.color),
+          _block(S.healingNow.t(code), ind.now.t(code), Icons.autorenew, ind.color),
+          _block(S.whatsComing.t(code), ind.coming.t(code), Icons.north_east, ind.color),
+          const SizedBox(height: 6),
+          RecoveryScreen._sources(content, code),
+          const SizedBox(height: 10),
           Text(S.notMedical.t(code), style: const TextStyle(fontSize: 12, color: SanadColors.textSecondary)),
         ],
       ),
     );
   }
 
-  Widget _legend(Color c, String label) => Row(
-        children: [
-          Container(width: 12, height: 12, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(3))),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 12, color: SanadColors.body)),
-        ],
-      );
+  Widget _legend(Color cc, String label) => Row(children: [
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: cc, borderRadius: BorderRadius.circular(3))),
+        const SizedBox(width: 6),
+        Text(label, style: const TextStyle(fontSize: 12, color: SanadColors.body)),
+      ]);
 
   Widget _block(String title, String body, IconData icon, Color color) => Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -207,7 +318,8 @@ class HealthDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 8), Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: color))]),
+            Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 8),
+              Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: color))]),
             const SizedBox(height: 6),
             Text(body, style: const TextStyle(height: 1.55, color: SanadColors.body)),
           ],
@@ -215,8 +327,6 @@ class HealthDetailScreen extends StatelessWidget {
       );
 }
 
-/// Recovery (rising) vs symptom-intensity (falling) over 60 days.
-/// RTL time axis: day 0 at the RIGHT, day 60 at the LEFT.
 class _RecoveryCurve extends CustomPainter {
   _RecoveryCurve({required this.full, required this.daysClean, required this.color, required this.code});
   final double full;
@@ -224,13 +334,12 @@ class _RecoveryCurve extends CustomPainter {
   final Color color;
   final String code;
 
-  void _text(Canvas c, String s, Offset at, Color col, {double size = 10, bool center = false}) {
+  void _text(Canvas c, String s, Offset at, Color col, {double size = 9, bool center = false}) {
     final tp = TextPainter(
       text: TextSpan(text: s, style: TextStyle(color: col, fontSize: size, fontWeight: FontWeight.w600)),
       textDirection: TextDirection.ltr,
     )..layout();
-    final dx = center ? at.dx - tp.width / 2 : at.dx;
-    tp.paint(c, Offset(dx, at.dy));
+    tp.paint(c, Offset(center ? at.dx - tp.width / 2 : at.dx, at.dy));
   }
 
   @override
@@ -238,27 +347,21 @@ class _RecoveryCurve extends CustomPainter {
     const padL = 26.0, padR = 10.0, padT = 8.0, padB = 26.0;
     final plotW = size.width - padL - padR;
     final plotH = size.height - padT - padB;
-    double px(double day) => padL + (1 - (day.clamp(0, 60)) / 60) * plotW; // RTL
+    double px(double day) => padL + (1 - (day.clamp(0, 60)) / 60) * plotW;
     double py(double v) => padT + (1 - v / 100) * plotH;
 
     final grid = Paint()..color = SanadColors.border..strokeWidth = 1;
     for (final v in [0, 50, 100]) {
       final y = py(v.toDouble());
       canvas.drawLine(Offset(padL, y), Offset(size.width - padR, y), grid);
-      _text(canvas, '$v', Offset(2, y - 6), SanadColors.textMuted, size: 9);
+      _text(canvas, '$v', Offset(2, y - 6), SanadColors.textMuted);
     }
-
-    // x ticks (RTL): day -> label
-    final ticks = <int, String>{
-      0: S.axisStart.t(code),
-      14: S.axisTwoWeeks.t(code),
-      30: S.axisMonth.t(code),
-      42: S.axisSixWeeks.t(code),
-      60: S.axisTwoMonths.t(code),
+    final ticks = {
+      0: S.axisStart.t(code), 14: S.axisTwoWeeks.t(code), 30: S.axisMonth.t(code),
+      42: S.axisSixWeeks.t(code), 60: S.axisTwoMonths.t(code),
     };
-    ticks.forEach((day, label) {
-      _text(canvas, label, Offset(px(day.toDouble()), size.height - padB + 6), SanadColors.textMuted, size: 9, center: true);
-    });
+    ticks.forEach((day, label) =>
+        _text(canvas, label, Offset(px(day.toDouble()), size.height - padB + 6), SanadColors.textMuted, center: true));
 
     double rec(double d) => (100 * (1 - math.pow(1 - math.min(1.0, d / full), 1.7))).toDouble();
     double inten(double d) {
@@ -269,18 +372,12 @@ class _RecoveryCurve extends CustomPainter {
     final recPath = Path(), intPath = Path();
     for (double d = 0; d <= 60; d += 1.5) {
       final xr = px(d);
-      if (d == 0) {
-        recPath.moveTo(xr, py(rec(d)));
-        intPath.moveTo(xr, py(inten(d)));
-      } else {
-        recPath.lineTo(xr, py(rec(d)));
-        intPath.lineTo(xr, py(inten(d)));
-      }
+      if (d == 0) { recPath.moveTo(xr, py(rec(d))); intPath.moveTo(xr, py(inten(d))); }
+      else { recPath.lineTo(xr, py(rec(d))); intPath.lineTo(xr, py(inten(d))); }
     }
     canvas.drawPath(intPath, Paint()..style = PaintingStyle.stroke..strokeWidth = 2.5..color = SanadColors.sos2.withValues(alpha: 0.85));
     canvas.drawPath(recPath, Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = color);
 
-    // you are here
     final dx = daysClean.clamp(0, 60).toDouble();
     final hx = px(dx), hy = py(rec(dx));
     canvas.drawCircle(Offset(hx, hy), 5, Paint()..color = color);
