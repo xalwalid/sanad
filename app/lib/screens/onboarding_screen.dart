@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import '../widgets/calendar.dart';
+import '../widgets/setup_cards.dart';
 import 'root_shell.dart';
 
 const _habitIcons = {
@@ -29,46 +30,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Habit _habit = Habit.cannabis;
   DateTime _quit = DateTime.now();
 
-  bool _costOn = true;
-  CostPeriod _period = CostPeriod.daily;
-  double _costAmount = 15;
-  bool _timeOn = true;
-  int _timeAmount = 45;
-  bool _usageOn = true;
-  String _method = 'joint';
-  int _usageAmount = 3;
   final _customName = TextEditingController();
+  SetupValues? _setup;
 
   String get code => context.read<AppState>().lang;
   String tr(L l) => l.t(code);
 
-  double get _dailyCost {
-    if (!_costOn) return 0;
-    switch (_period) {
-      case CostPeriod.daily:
-        return _costAmount;
-      case CostPeriod.weekly:
-        return _costAmount / 7;
-      case CostPeriod.hourly:
-      case CostPeriod.perUse:
-        return _costAmount * _usageAmount;
-    }
-  }
-
   void _finish() {
+    final v = _setup ?? SetupValues.defaults(_habit, code);
     final p = RecoveryProfile(
       habit: _habit,
       customName: _habit == Habit.other ? _customName.text.trim() : null,
       quitDate: _quit,
-      costOn: _costOn,
-      costPeriod: _period,
-      costAmount: _costAmount,
-      timeSetupOn: _timeOn,
-      timeAmount: _timeAmount,
-      usageOn: _usageOn,
-      usageMethod: _method,
-      usageAmount: _usageAmount,
     );
+    v.applyTo(p);
     context.read<AppState>().createProfile(p);
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const RootShell()));
@@ -194,7 +169,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               return GestureDetector(
                 onTap: () => setState(() {
                   _habit = h;
-                  _method = h == Habit.alcohol ? 'drink' : 'joint';
+                  _setup = null; // re-default unit options for the new habit
                 }),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 11),
@@ -284,7 +259,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(20),
-          child: FilledButton(onPressed: () => setState(() => _step = 3), child: Text(tr(S.cont))),
+          child: FilledButton(
+              onPressed: () => setState(() {
+                    _setup ??= SetupValues.defaults(_habit, code);
+                    _step = 3;
+                  }),
+              child: Text(tr(S.cont))),
         ),
       ],
     );
@@ -313,9 +293,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // ---- step 3: spend ----
+  // ---- step 3: spend / intake ----
   Widget _spendStep() {
-    final monthly = (_dailyCost * 30).round();
+    final v = _setup ??= SetupValues.defaults(_habit, code);
     return Column(
       children: [
         _topBar(3),
@@ -330,54 +310,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 26),
-            children: [
-              _setupCard(
-                title: tr(S.moneyHeader),
-                on: _costOn,
-                onToggle: (v) => setState(() => _costOn = v),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        _chip(tr(S.pDaily), _period == CostPeriod.daily, () => setState(() => _period = CostPeriod.daily)),
-                        _chip(tr(S.pWeekly), _period == CostPeriod.weekly, () => setState(() => _period = CostPeriod.weekly)),
-                        _chip(tr(S.pHourly), _period == CostPeriod.hourly, () => setState(() => _period = CostPeriod.hourly)),
-                        _chip(tr(S.pPerUse), _period == CostPeriod.perUse, () => setState(() => _period = CostPeriod.perUse)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _stepper('${_costAmount.round()} ${profileCurrency()}',
-                        () => setState(() => _costAmount = (_costAmount - 5).clamp(0, 100000)),
-                        () => setState(() => _costAmount += 5)),
-                    if (_costOn)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: _infoPill(S.monthlyEst.t(code).replaceFirst('{x}', '$monthly').replaceFirst('{cur}', profileCurrency())),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              _setupCard(
-                title: tr(S.timeHeader),
-                on: _timeOn,
-                onToggle: (v) => setState(() => _timeOn = v),
-                child: _stepper('$_timeAmount ${tr(S.minutes)}',
-                    () => setState(() => _timeAmount = (_timeAmount - 5).clamp(5, 600)),
-                    () => setState(() => _timeAmount += 5)),
-              ),
-              const SizedBox(height: 12),
-              _setupCard(
-                title: tr(S.usageHeader),
-                on: _usageOn,
-                onToggle: (v) => setState(() => _usageOn = v),
-                child: _stepper('$_usageAmount ${tr(S.perDay)}',
-                    () => setState(() => _usageAmount = (_usageAmount - 1).clamp(1, 20)),
-                    () => setState(() => _usageAmount = (_usageAmount + 1).clamp(1, 20))),
-              ),
-            ],
+            children: [SetupCards(values: v, habit: _habit, code: code)],
           ),
         ),
         Padding(
@@ -391,70 +324,4 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ],
     );
   }
-
-  String profileCurrency() => code == 'ar' ? 'د.ل' : 'LYD';
-
-  Widget _setupCard({required String title, required bool on, required ValueChanged<bool> onToggle, required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: SanadColors.border)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: SanadColors.heading)),
-              const Spacer(),
-              Switch(value: on, activeColor: SanadColors.primary, onChanged: onToggle),
-            ],
-          ),
-          if (on) ...[const SizedBox(height: 6), child] else
-            Padding(padding: const EdgeInsets.only(top: 4), child: Text(tr(S.offMoney), style: const TextStyle(color: SanadColors.textSecondary, fontSize: 12))),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, bool on, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: on ? SanadColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(13),
-          border: Border.all(color: on ? SanadColors.primary : SanadColors.border),
-        ),
-        child: Text(label, style: TextStyle(color: on ? Colors.white : SanadColors.heading, fontWeight: FontWeight.w600, fontSize: 13)),
-      ),
-    );
-  }
-
-  Widget _stepper(String value, VoidCallback minus, VoidCallback plus) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _rnd(Icons.remove, minus),
-        Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: SanadColors.heading)),
-        _rnd(Icons.add, plus),
-      ],
-    );
-  }
-
-  Widget _rnd(IconData i, VoidCallback onTap) => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(color: SanadColors.iconTile, borderRadius: BorderRadius.circular(12)),
-          child: Icon(i, color: SanadColors.primary),
-        ),
-      );
-
-  Widget _infoPill(String text) => Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: SanadColors.softCardB, borderRadius: BorderRadius.circular(16)),
-        child: Text(text, style: const TextStyle(color: SanadColors.primary, fontWeight: FontWeight.w600, fontSize: 13)),
-      );
 }

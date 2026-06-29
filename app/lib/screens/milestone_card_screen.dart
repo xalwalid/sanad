@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
+import '../logic/calculations.dart';
 import '../logic/recovery_content.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
@@ -26,6 +27,7 @@ class ShareCardScreen extends StatelessWidget {
     final hu = RecoveryContent.instance.forHabit(p.habit.id);
     final cur = code == 'ar' ? 'د.ل' : 'LYD';
     final massVal = hu.massPer * s.cardUnits;
+    final unitWord = p.usageUnit.isNotEmpty ? p.usageUnit : habitUnits[p.habit]!.first.t(code);
 
     final cleanLine = p.showHabit
         ? S.cleanFrom.t(code).replaceFirst('{habit}', habitTitle(p, code))
@@ -33,8 +35,8 @@ class ShareCardScreen extends StatelessWidget {
 
     final chips = <Widget>[
       if (p.showMoney && p.costOn) _chip('${s.money} $cur', S.mMoney.t(code)),
-      if (p.showTime && p.timeSetupOn) _chip('${s.timeH} ${S.unitHour.t(code)}', S.mTime.t(code)),
-      if (p.showUnits && p.usageOn) _chip('${s.units}', S.mAvoided.t(code)),
+      if (p.showTime && p.timeSetupOn) _chip(Stats.fmtDuration(s.timeMinutesTotal, code), S.mTime.t(code)),
+      if (p.showUnits && p.usageOn) _chip('${Stats.fmtNum(s.unitsAvoided)} $unitWord', S.mAvoided.t(code)),
       if (p.showMass && hu.massPer > 0)
         _chip(hu.massRound == 0 ? '${massVal.round()}' : massVal.toStringAsFixed(1), hu.massLabel.t(code)),
     ];

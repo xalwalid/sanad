@@ -27,8 +27,18 @@ class S {
   static const skipStep = L('تخطّ هذه الخطوة', 'Skip this step');
   static const moneyHeader = L('المال', 'Money');
   static const timeHeader = L('الوقت', 'Time');
-  static const usageHeader = L('الاستخدام', 'Usage');
+  static const usageHeader = L('الكمية', 'Amount');
   static const offMoney = L('لن نعرض المال الموفّر.', "We won't show money saved.");
+  static const offTime = L('لن نعرض الوقت المستعاد.', "We won't show time reclaimed.");
+  static const offUsage = L('لن نعرض الكمية المتجنَّبة.', "We won't show the amount avoided.");
+  static const usageHowMuch = L('كم تتعاطى في كل مرّة أو فترة؟', 'How much, per use or period?');
+  static const unitLabel = L('الوحدة', 'Unit');
+  static const customUnit = L('غير ذلك', 'Other');
+  static const customUnitHint = L('اكتب الوحدة (مثال: لتر)', 'Type the unit (e.g. liter)');
+  static const timePerDayLabel = L('الوقت المُهدر يوميًا', 'Time spent per day');
+  static const editSetup = L('تعديل الإعداد', 'Edit setup');
+  static const editSetupSub = L('عدّل المال والوقت والكمية في أيّ وقت', 'Change money, time and amount anytime');
+  static const tapToSeeMore = L('اضغط على أيّ مؤشّر لعرض تفاصيله', 'Tap any indicator to see details');
   static const perDay = L('مرّات/يوم', 'times/day');
   static const minutes = L('دقيقة', 'min');
   static const monthlyEst = L('ستوفّر نحو {x} {cur} شهريًا', "You'll save about {x} {cur} monthly");
@@ -43,7 +53,7 @@ class S {
   static const greeting = L('مساؤك طيّب', 'Good evening');
   static const quittingFrom = L('إقلاعك عن {habit}', 'Quitting {habit}');
   static const daysClean = L('يومًا نظيفًا', 'days clean');
-  static const nextMilestone = L('المعلم القادم', 'Next milestone');
+  static const nextMilestone = L('الإنجاز القادم', 'Next milestone');
   static const remains = L('باقٍ {n} يومًا لـ {m}', '{n} days to {m}');
   static const pledge = L('أتعهّد بالبقاء نظيفًا اليوم', 'I pledge to stay clean today');
   static const pledged = L('تعهّدت اليوم', 'Pledged today');
@@ -121,7 +131,7 @@ class S {
   static const cravingLast = L('الرغبة تضعف', 'Cravings easing');
   static const checkinHistory = L('سجلّ تسجيلاتك', 'Your check-ins');
   static const noCheckins = L('لا تسجيلات بعد. سجّل يومك من الرئيسية.', 'No check-ins yet. Log your day from Home.');
-  static const milestonesTitle = L('المعالم', 'Milestones');
+  static const milestonesTitle = L('الإنجازات', 'Milestones');
   static const moodLabel = L('المزاج', 'Mood');
   static const cravingLabel = L('الرغبة', 'Craving');
 

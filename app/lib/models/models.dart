@@ -29,13 +29,15 @@ class RecoveryProfile {
     this.costOn = true,
     this.costPeriod = CostPeriod.daily,
     this.costAmount = 15,
-    // time setup
+    // time setup (minutes per day)
     this.timeSetupOn = true,
-    this.timeAmount = 45, // minutes per use
-    // usage setup
+    this.timeAmount = 60,
+    // usage / intake setup
     this.usageOn = true,
     this.usageMethod = 'joint',
-    this.usageAmount = 3, // uses per day
+    this.usageAmount = 2,
+    this.usageUnit = '',
+    this.usagePeriod = CostPeriod.daily,
     // share-card selective disclosure
     this.showMoney = true,
     this.showTime = true,
@@ -55,10 +57,12 @@ class RecoveryProfile {
   CostPeriod costPeriod;
   double costAmount;
   bool timeSetupOn;
-  int timeAmount;
+  int timeAmount; // minutes per day
   bool usageOn;
-  String usageMethod;
-  int usageAmount;
+  String usageMethod; // legacy
+  double usageAmount;
+  String usageUnit; // display unit, e.g. liter / puff (empty = generic)
+  CostPeriod usagePeriod;
 
   bool showMoney, showTime, showUnits, showMass, showHabit;
 
@@ -77,6 +81,8 @@ class RecoveryProfile {
         'usageOn': usageOn,
         'usageMethod': usageMethod,
         'usageAmount': usageAmount,
+        'usageUnit': usageUnit,
+        'usagePeriod': usagePeriod.name,
         'showMoney': showMoney,
         'showTime': showTime,
         'showUnits': showUnits,
@@ -100,7 +106,11 @@ class RecoveryProfile {
         timeAmount: (j['timeAmount'] as int?) ?? 45,
         usageOn: (j['usageOn'] as bool?) ?? true,
         usageMethod: (j['usageMethod'] as String?) ?? 'joint',
-        usageAmount: (j['usageAmount'] as int?) ?? 3,
+        usageAmount: (j['usageAmount'] as num?)?.toDouble() ?? 2,
+        usageUnit: (j['usageUnit'] as String?) ?? '',
+        usagePeriod: CostPeriod.values.firstWhere(
+            (c) => c.name == (j['usagePeriod'] ?? 'daily'),
+            orElse: () => CostPeriod.daily),
         showMoney: (j['showMoney'] as bool?) ?? true,
         showTime: (j['showTime'] as bool?) ?? true,
         showUnits: (j['showUnits'] as bool?) ?? true,

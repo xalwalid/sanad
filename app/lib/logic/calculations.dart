@@ -1,16 +1,7 @@
 import '../models/models.dart';
 import '../data/catalog.dart';
 
-class HealthGauge {
-  HealthGauge(this.def, this.value, this.remaining);
-  final MetricDef def;
-  final int value; // 0..100
-  final int remaining; // days left to full
-  bool get done => remaining == 0;
-}
-
 /// All stats computed from the quit date — never stored stale.
-/// Mirrors the hand-off's renderVals() logic.
 class Stats {
   Stats(this.p, {DateTime? now}) : _now = now ?? DateTime.now();
   final RecoveryProfile p;
@@ -25,6 +16,23 @@ class Stats {
       milestones.firstWhere((m) => m > daysClean, orElse: () => 365);
   int get daysToNext => nextMilestone - daysClean;
   double get ringProgress => (daysClean / nextMilestone).clamp(0, 1).toDouble();
+  int get longest => daysClean > p.longestStreakDays ? daysClean : p.longestStreakDays;
+
+  // ---- period helpers ----
+  static double _perDay(double amount, CostPeriod period) {
+    switch (period) {
+      case CostPeriod.daily:
+        return amount;
+      case CostPeriod.weekly:
+        return amount / 7;
+      case CostPeriod.hourly:
+        return amount * 16; // waking hours
+      case CostPeriod.perUse:
+        return amount; // treat as per-day occurrences
+    }
+  }
+
+  double get usagePerDay => _perDay(p.usageAmount, p.usagePeriod);
 
   double get dailyCost {
     if (!p.costOn) return 0;
@@ -34,31 +42,26 @@ class Stats {
       case CostPeriod.weekly:
         return p.costAmount / 7;
       case CostPeriod.hourly:
-        return p.costAmount * p.usageAmount;
+        return p.costAmount * 16;
       case CostPeriod.perUse:
-        return p.costAmount * p.usageAmount;
+        return p.costAmount * usagePerDay;
     }
   }
 
   int get money => (dailyCost * daysClean).round();
   int get monthly => (dailyCost * 30).round();
-  int get timeH =>
-      p.timeSetupOn ? (p.timeAmount * p.usageAmount * daysClean / 60).round() : 0;
-  int get units => p.usageOn ? daysClean * p.usageAmount : 0;
-  int get longest => daysClean > p.longestStreakDays ? daysClean : p.longestStreakDays;
 
-  /// Health gauges, sorted by remaining days ascending (as in the hand-off).
-  List<HealthGauge> healthGauges() {
-    final list = metricsDef.map((m) {
-      final v = ((daysClean / m.full) * 100).round().clamp(0, 100);
-      final rem = (m.full - daysClean) < 0 ? 0 : (m.full - daysClean);
-      return HealthGauge(m, v, rem);
-    }).toList()
-      ..sort((a, b) => a.remaining.compareTo(b.remaining));
-    return list;
-  }
+  /// Total minutes reclaimed (timeAmount is minutes/day).
+  int get timeMinutesTotal => p.timeSetupOn ? p.timeAmount * daysClean : 0;
 
-  int get fullyHealed => metricsDef.where((m) => daysClean >= m.full).length;
+  /// Amount avoided, in the user's chosen unit (may be fractional, e.g. liters).
+  double get unitsAvoided => p.usageOn ? usagePerDay * daysClean : 0;
+
+  // ---- 30-day share card ----
+  double get _perDayOrGuess => usagePerDay <= 0 ? 1 : usagePerDay;
+  double get cardUnits => _perDayOrGuess * 30;
+  int get cardMoney => ((p.costOn ? dailyCost : _perDayOrGuess * 3) * 30).round();
+  int get cardTimeMinutes => (p.timeSetupOn ? p.timeAmount : 60) * 30;
 
   String get phaseKey {
     final d = daysClean;
@@ -69,17 +72,21 @@ class Stats {
     return 'deep';
   }
 
-  // ---- 30-day achievement / share card ----
-  int get _perDay => p.usageAmount < 1 ? 1 : p.usageAmount;
-  int get cardUnits => _perDay * 30;
-  int get cardMoney =>
-      ((p.costOn ? dailyCost : _perDay * 3) * 30).round();
-  int get cardTime =>
-      ((p.timeAmount < 10 ? 10 : p.timeAmount) * _perDay * 30 / 60).round();
-  double get cardMass {
-    final hu = habitCatalog[p.habit]!;
-    return hu.massPer == 0 ? 0 : cardUnits * hu.massPer;
+  static DateTime _dayStart(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  // ---- formatting helpers ----
+  /// 110 -> "1س 50د" / "1h 50m". Western digits always.
+  static String fmtDuration(int totalMinutes, String code) {
+    final h = totalMinutes ~/ 60;
+    final m = totalMinutes % 60;
+    final hU = code == 'ar' ? 'س' : 'h';
+    final mU = code == 'ar' ? 'د' : 'm';
+    if (h == 0) return '$m$mU';
+    if (m == 0) return '$h$hU';
+    return '$h$hU $m$mU';
   }
 
-  static DateTime _dayStart(DateTime d) => DateTime(d.year, d.month, d.day);
+  /// Round nicely: whole -> "5", fractional -> "1.5".
+  static String fmtNum(double v) =>
+      v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
 }

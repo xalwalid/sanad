@@ -8,6 +8,7 @@ import '../theme/sanad_theme.dart';
 import 'relapse_screen.dart';
 import 'crisis_screen.dart';
 import 'sos_screen.dart';
+import 'edit_setup_screen.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -64,6 +65,8 @@ class MeScreen extends StatelessWidget {
               '${s.daysClean} ${S.unitDay.t(code)}', null),
           _tile(Icons.event_outlined, tr(S.editQuitDate), tr(S.editQuitDateSub),
               () => _editDate(context, app)),
+          _tile(Icons.tune, tr(S.editSetup), tr(S.editSetupSub),
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditSetupScreen()))),
 
           _section(code == 'ar' ? 'الرحلة' : 'Journey'),
           _tile(Icons.refresh, tr(S.relapseReset), tr(S.relapseResetSub),
@@ -96,6 +99,8 @@ class MeScreen extends StatelessWidget {
       initialDate: app.profile!.quitDate,
       firstDate: today.subtract(const Duration(days: 3650)),
       lastDate: today,
+      builder: (ctx, child) =>
+          Localizations.override(context: ctx, locale: const Locale('en'), child: child),
     );
     if (picked != null) await app.setQuitDate(picked);
   }

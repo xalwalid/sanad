@@ -30,6 +30,17 @@ class HabitInfo {
 
 const milestones = [7, 30, 100, 365];
 
+/// Smart per-habit unit options for the intake setup (user can also type custom).
+const Map<Habit, List<L>> habitUnits = {
+  Habit.cannabis: [L('لفافة', 'joint'), L('غرام', 'gram'), L('جلسة', 'session')],
+  Habit.alcohol: [L('مشروب', 'drink'), L('كأس', 'glass'), L('لتر', 'liter'), L('قنينة', 'bottle'), L('علبة', 'can')],
+  Habit.cigarettes: [L('سيجارة', 'cigarette'), L('علبة', 'pack')],
+  Habit.vaping: [L('نفس', 'puff'), L('جلسة', 'session'), L('عبوة', 'pod')],
+  Habit.gambling: [L('رهان', 'bet'), L('جلسة', 'session')],
+  Habit.porn: [L('مرّة', 'session')],
+  Habit.other: [L('مرّة', 'time')],
+};
+
 /// Display name for a profile's habit — the user's typed name for 'other'.
 String habitTitle(RecoveryProfile p, String code) {
   if (p.habit == Habit.other && (p.customName?.trim().isNotEmpty ?? false)) {

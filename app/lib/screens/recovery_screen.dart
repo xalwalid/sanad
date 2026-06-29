@@ -29,17 +29,21 @@ class RecoveryScreen extends StatelessWidget {
 
           // phase / current-week header
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(gradient: SanadColors.heroGradient, borderRadius: BorderRadius.circular(20)),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            decoration: BoxDecoration(gradient: SanadColors.heroGradient, borderRadius: BorderRadius.circular(24)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${S.youAreIn.t(code)}: ${week.label.t(code)}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
-                const SizedBox(height: 4),
+                Text(S.youAreIn.t(code),
+                    style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 13)),
+                const SizedBox(height: 2),
+                Text(week.label.t(code),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 24)),
+                const SizedBox(height: 8),
                 Text(
                   S.healedSummary.t(code).replaceFirst('{x}', '$healed').replaceFirst('{y}', '${c.indicators.length}'),
-                  style: const TextStyle(color: Color(0xFFD7EDE0), fontSize: 12.5),
+                  style: const TextStyle(color: Color(0xFFD7EDE0), fontSize: 14, height: 1.4),
                 ),
               ],
             ),
@@ -90,6 +94,15 @@ class RecoveryScreen extends StatelessWidget {
 
           Text(S.indicatorsTitle.t(code),
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: SanadColors.textSecondary)),
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              const Icon(Icons.touch_app_outlined, size: 14, color: SanadColors.primary),
+              const SizedBox(width: 4),
+              Text(S.tapToSeeMore.t(code),
+                  style: const TextStyle(fontSize: 12, color: SanadColors.primary)),
+            ],
+          ),
           const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 2,
@@ -278,9 +291,9 @@ class IndicatorDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         children: [
           Row(children: [
-            _legend(ind.color, S.curveRecovery.t(code)),
+            _legend(SanadColors.primary, S.curveRecovery.t(code)),
             const SizedBox(width: 16),
-            _legend(SanadColors.sos2, S.curveSymptoms.t(code)),
+            _legend(SanadColors.sos1, S.curveSymptoms.t(code)),
           ]),
           const SizedBox(height: 10),
           Container(
@@ -288,7 +301,7 @@ class IndicatorDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(6, 10, 6, 6),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: SanadColors.border)),
             child: CustomPaint(
-              painter: _RecoveryCurve(full: ind.full.toDouble(), daysClean: days, color: ind.color, code: code),
+              painter: _RecoveryCurve(full: ind.full.toDouble(), daysClean: days, color: SanadColors.primary, code: code),
               size: Size.infinite,
             ),
           ),
@@ -375,7 +388,7 @@ class _RecoveryCurve extends CustomPainter {
       if (d == 0) { recPath.moveTo(xr, py(rec(d))); intPath.moveTo(xr, py(inten(d))); }
       else { recPath.lineTo(xr, py(rec(d))); intPath.lineTo(xr, py(inten(d))); }
     }
-    canvas.drawPath(intPath, Paint()..style = PaintingStyle.stroke..strokeWidth = 2.5..color = SanadColors.sos2.withValues(alpha: 0.85));
+    canvas.drawPath(intPath, Paint()..style = PaintingStyle.stroke..strokeWidth = 2.5..color = SanadColors.sos1.withValues(alpha: 0.9));
     canvas.drawPath(recPath, Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = color);
 
     final dx = daysClean.clamp(0, 60).toDouble();

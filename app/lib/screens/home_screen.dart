@@ -248,11 +248,12 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
 
   Widget _statsGrid(Stats s, p, String code) {
     final cur = code == 'ar' ? 'د.ل' : 'LYD';
+    final unitWord = p.usageUnit.isNotEmpty ? p.usageUnit : habitUnits[p.habit]!.first.t(code);
     final cells = [
       _stat(S.mMoney.t(code), p.costOn ? '${s.money} $cur' : '—'),
-      _stat(S.mTime.t(code), p.timeSetupOn ? '${s.timeH} ${S.unitHour.t(code)}' : '—'),
+      _stat(S.mTime.t(code), p.timeSetupOn ? Stats.fmtDuration(s.timeMinutesTotal, code) : '—'),
       _stat(S.mLongest.t(code), '${s.longest}'),
-      _stat(S.mAvoided.t(code), p.usageOn ? '${s.units}' : '—'),
+      _stat(S.mAvoided.t(code), p.usageOn ? '${Stats.fmtNum(s.unitsAvoided)} $unitWord' : '—'),
     ];
     return GridView.count(
       crossAxisCount: 2,
