@@ -96,9 +96,11 @@ class S {
   static const cleanPlain = L('يومًا نظيفًا', 'days clean');
   static const chHabit = L('نوع الإدمان', 'Habit type');
   static const chMass = L('الكمية المتجنَّبة', 'Amount avoided');
-  static const saveImage = L('حفظ الصورة', 'Save image');
+  static const saveImage = L('حفظ الصورة في المعرض', 'Save image to gallery');
   static const shareBtn = L('مشاركة', 'Share');
   static const saved = L('تم الحفظ', 'Saved');
+  static const savedToGallery = L('حُفظت الصورة في معرض الصور', 'Saved to your gallery');
+  static const saveFailed = L('تعذّر الحفظ. جرّب المشاركة بدلًا من ذلك.', "Couldn't save. Try sharing instead.");
 
   // relapse
   static const relapseTitle = L('بداية جديدة', 'A new start');
@@ -127,13 +129,18 @@ class S {
 
   // progress tab
   static const progressTitle = L('تقدّمك', 'Your progress');
-  static const moodLast = L('المزاج آخر ٧ أيام', 'Mood, last 7 days');
+  static const moodLast = L('المزاج آخر 7 أيام', 'Mood, last 7 days');
   static const cravingLast = L('الرغبة تضعف', 'Cravings easing');
   static const checkinHistory = L('سجلّ تسجيلاتك', 'Your check-ins');
   static const noCheckins = L('لا تسجيلات بعد. سجّل يومك من الرئيسية.', 'No check-ins yet. Log your day from Home.');
   static const milestonesTitle = L('الإنجازات', 'Milestones');
   static const moodLabel = L('المزاج', 'Mood');
   static const cravingLabel = L('الرغبة', 'Craving');
+  static const axisDay = L('اليوم (رقم الشهر)', 'Day of month');
+  static const moodLow = L('منخفض', 'Low');
+  static const moodHigh = L('مرتفع', 'High');
+  static const cravingMild = L('خفيفة', 'Mild');
+  static const cravingStrong = L('شديدة', 'Strong');
 
   // me tab
   static const meTitle = L('حسابي', 'Me');
@@ -188,7 +195,7 @@ class S {
   static const axisStart = L('البداية', 'Start');
   static const axisTwoWeeks = L('أسبوعان', '2 wks');
   static const axisMonth = L('شهر', '1 mo');
-  static const axisSixWeeks = L('٦ أسابيع', '6 wks');
+  static const axisSixWeeks = L('6 أسابيع', '6 wks');
   static const axisTwoMonths = L('شهران', '2 mo');
 
   // community

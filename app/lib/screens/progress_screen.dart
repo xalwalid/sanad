@@ -40,12 +40,12 @@ class ProgressScreen extends StatelessWidget {
             Text(tr(S.moodLast),
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: SanadColors.textSecondary)),
             const SizedBox(height: 8),
-            _chartCard(_bars(last7, (c) => c.mood, false)),
+            _chart(last7, (c) => c.mood, false, tr(S.moodLow), tr(S.moodHigh), code),
             const SizedBox(height: 16),
             Text(tr(S.cravingLast),
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: SanadColors.textSecondary)),
             const SizedBox(height: 8),
-            _chartCard(_bars(last7, (c) => c.craving, true)),
+            _chart(last7, (c) => c.craving, true, tr(S.cravingMild), tr(S.cravingStrong), code),
             const SizedBox(height: 20),
           ],
 
@@ -91,11 +91,42 @@ class ProgressScreen extends StatelessWidget {
     );
   }
 
-  Widget _chartCard(Widget bars) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: SanadColors.border)),
-        child: SizedBox(height: 110, child: bars),
-      );
+  Widget _chart(List<CheckIn> data, int Function(CheckIn) val, bool invert, String lowLabel, String highLabel, String code) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: SanadColors.border)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 116,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [for (var n = 5; n >= 1; n--) Text('$n', style: const TextStyle(fontSize: 9, color: SanadColors.textMuted))],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(child: _bars(data, val, invert)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(S.axisDay.t(code), style: const TextStyle(fontSize: 11, color: SanadColors.textSecondary)),
+              Text('$highLabel ↑ · $lowLabel ↓', style: const TextStyle(fontSize: 11, color: SanadColors.textSecondary)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _bars(List<CheckIn> data, int Function(CheckIn) val, bool invert) {
     return Row(

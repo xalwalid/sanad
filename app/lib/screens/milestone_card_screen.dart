@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:gal/gal.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../logic/calculations.dart';
@@ -41,14 +42,34 @@ class ShareCardScreen extends StatelessWidget {
         _chip(hu.massRound == 0 ? '${massVal.round()}' : massVal.toStringAsFixed(1), hu.massLabel.t(code)),
     ];
 
-    Future<void> share() async {
+    Future<List<int>> capture() async {
       final b = _boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final img = await b.toImage(pixelRatio: 3);
       final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
+      return bytes!.buffer.asUint8List();
+    }
+
+    Future<void> share() async {
       final dir = await getTemporaryDirectory();
       final f = File('${dir.path}/sanad_card.png');
-      await f.writeAsBytes(bytes!.buffer.asUint8List());
+      await f.writeAsBytes(await capture());
       await Share.shareXFiles([XFile(f.path)], text: 'سند · sanad.com.ly');
+    }
+
+    Future<void> saveImage() async {
+      try {
+        final bytes = Uint8List.fromList(await capture());
+        await Gal.putImageBytes(bytes, name: 'sanad_${s.daysClean}');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(S.savedToGallery.t(code)), backgroundColor: SanadColors.primary),
+          );
+        }
+      } catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.saveFailed.t(code))));
+        }
+      }
     }
 
     return Scaffold(
@@ -121,7 +142,17 @@ class ShareCardScreen extends StatelessWidget {
           if (hu.massPer > 0) _toggle(S.chMass.t(code), p.showMass, (v) => app.updateProfile((x) => x.showMass = v)),
           _toggle(S.chHabit.t(code), p.showHabit, (v) => app.updateProfile((x) => x.showHabit = v)),
           const SizedBox(height: 14),
-          FilledButton.icon(icon: const Icon(Icons.ios_share), label: Text(S.shareBtn.t(code)), onPressed: share),
+          FilledButton.icon(icon: const Icon(Icons.download_rounded), label: Text(S.saveImage.t(code)), onPressed: saveImage),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.ios_share, color: SanadColors.primary),
+            label: Text(S.shareBtn.t(code), style: const TextStyle(color: SanadColors.primary)),
+            style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                side: const BorderSide(color: SanadColors.ringB),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+            onPressed: share,
+          ),
         ],
       ),
     );
