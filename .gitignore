@@ -52,3 +52,8 @@ _unlock.bat
 _unlock_log.txt
 _push_log.txt
 app/assets/.writetest
+
+_gen-keystore.bat
+_keystore-base64.bat
+_keystore.b64.txt
+app/keystores/

@@ -1,0 +1,51 @@
+name: Android release (signed AAB)
+
+# Manual only. Requires these repo secrets (Settings > Secrets and variables > Actions):
+#   ANDROID_KEYSTORE_BASE64     base64 of app/keystores/sanad-release.jks (_keystore-base64.bat)
+#   ANDROID_KEYSTORE_PASSWORD   the keystore password you chose
+#   ANDROID_KEY_ALIAS           sanad
+#   ANDROID_KEY_PASSWORD        the key password (same as keystore if you pressed Enter)
+on:
+  workflow_dispatch:
+
+env:
+  APP_DIR: app
+  FLUTTER_VERSION: "3.29.0"
+  ORG: ly.com
+
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - name: Generate native folders
+        run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
+        working-directory: ${{ env.APP_DIR }}
+      - run: flutter pub get
+        working-directory: ${{ env.APP_DIR }}
+      - name: Inject release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: bash ../scripts/patch-android-signing.sh
+        working-directory: ${{ env.APP_DIR }}
+      - name: Build signed AAB
+        run: flutter build appbundle --release
+        working-directory: ${{ env.APP_DIR }}
+      - name: Build signed APK (for direct install/testing)
+        run: flutter build apk --release
+        working-directory: ${{ env.APP_DIR }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanad-release-aab
+          path: app/build/app/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanad-release-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk

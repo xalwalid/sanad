@@ -1,0 +1,55 @@
+# Codemagic — cloud iOS build for Sanad (Flutter). No Mac needed.
+# Mirrors the Tripoli Streets setup. Free tier (500 macOS min/mo) is plenty.
+#
+# One-time Codemagic setup (Team settings):
+#   1. Add the Sanad repo (xalwalid/sanad).
+#   2. App Store Connect integration (App Store Connect API key .p8 + Key ID +
+#      Issuer ID). You already have one from Tripoli Streets — reuse the same
+#      Apple account (Team L27Z2WV29H). Name the integration below.
+#   3. Create the App record in App Store Connect with bundle id ly.com.sanad,
+#      then put its numeric Apple ID into APP_STORE_APP_ID.
+workflows:
+  ios-release:
+    name: Sanad iOS (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: CODEMAGIC_ASC_INTEGRATION_NAME   # <-- set to your integration name
+    environment:
+      flutter: 3.29.0
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "ly.com.sanad"
+        APP_STORE_APP_ID: "PUT_NUMERIC_APPLE_ID_HERE"
+    scripts:
+      - name: Flutter deps
+        script: cd app && flutter pub get
+      - name: Regenerate iOS native + patch Info.plist
+        script: |
+          cd app
+          flutter create --platforms=ios --org ly.com --project-name sanad .
+          bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
+      - name: Set build number
+        script: |
+          cd app/ios
+          agvtool new-version -all $(($BUILD_NUMBER))
+      - name: Signing (fetch/create App Store profile)
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          cd app
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - app/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
