@@ -19,7 +19,7 @@ on:
 env:
   APP_DIR: app
   FLUTTER_VERSION: "3.29.0"
-  ORG: ly.com.sanad
+  ORG: ly.com
 
 jobs:
   analyze-and-test:
@@ -94,7 +94,10 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
       - run: flutter pub get
         working-directory: ${{ env.APP_DIR }}
-      # Unsigned build to validate compilation. Real signing/TestFlight needs an
-      # Apple API key + certs in secrets (use fastlane match), then `flutter build ipa`.
+      - name: Patch iOS Info.plist (photo-library permission)
+        run: bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
+        working-directory: ${{ env.APP_DIR }}
+      # Unsigned build to validate compilation. Real signing/TestFlight is handled
+      # by Codemagic (see codemagic.yaml) with the App Store Connect API key.
       - run: flutter build ios --release --no-codesign
         working-directory: ${{ env.APP_DIR }}

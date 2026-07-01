@@ -6,10 +6,9 @@ import '../theme/sanad_theme.dart';
 import 'home_screen.dart';
 import 'progress_screen.dart';
 import 'recovery_screen.dart';
-import 'community_screen.dart';
 import 'me_screen.dart';
 
-/// The 5-tab shell: Home · Progress · Recovery · Community · Me.
+/// The 4-tab shell: Home · Progress · Recovery · Me. (Community lands in Phase 3.)
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
   @override
@@ -26,7 +25,6 @@ class _RootShellState extends State<RootShell> {
       HomeTab(onOpenRecovery: () => setState(() => _index = 2)),
       const ProgressScreen(),
       const RecoveryScreen(),
-      const CommunityScreen(),
       const MeScreen(),
     ];
 
@@ -48,7 +46,6 @@ class _RootShellState extends State<RootShell> {
             _dest(Icons.home_outlined, Icons.home, S.navHome.t(code)),
             _dest(Icons.show_chart_outlined, Icons.show_chart, S.navProgress.t(code)),
             _dest(Icons.spa_outlined, Icons.spa, S.navRecovery.t(code)),
-            _dest(Icons.groups_outlined, Icons.groups, S.navCommunity.t(code)),
             _dest(Icons.person_outline, Icons.person, S.navMe.t(code)),
           ],
         ),
