@@ -25,7 +25,15 @@ jobs:
       - name: Generate native folders
         run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
         working-directory: ${{ env.APP_DIR }}
+      - name: Patch AndroidManifest (url_launcher queries)
+        run: bash ../scripts/patch-android-manifest.sh
+        working-directory: ${{ env.APP_DIR }}
       - run: flutter pub get
+        working-directory: ${{ env.APP_DIR }}
+      - name: Brand launcher icon + splash
+        run: |
+          dart run flutter_launcher_icons
+          dart run flutter_native_splash:create
         working-directory: ${{ env.APP_DIR }}
       - name: Inject release signing
         env:

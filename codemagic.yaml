@@ -30,6 +30,8 @@ workflows:
           cd app
           flutter create --platforms=ios --org ly.com --project-name sanad .
           bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
+          dart run flutter_launcher_icons
+          dart run flutter_native_splash:create
       - name: Set build number
         script: |
           cd app/ios

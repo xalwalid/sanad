@@ -9,6 +9,8 @@ import 'relapse_screen.dart';
 import 'crisis_screen.dart';
 import 'sos_screen.dart';
 import 'edit_setup_screen.dart';
+import 'backup_screen.dart';
+import 'about_screens.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -76,9 +78,25 @@ class MeScreen extends StatelessWidget {
 
           _section(code == 'ar' ? 'الخصوصية والبيانات' : 'Privacy & data'),
           _tile(Icons.phone_iphone, tr(S.onDevice), tr(S.onDeviceSub), null),
-          _tile(Icons.download_outlined, tr(S.backupTitle), tr(S.backupSub), null),
+          _tile(Icons.download_outlined, tr(S.backupTitle), tr(S.backupSub),
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BackupScreen()))),
           _tile(Icons.language, tr(S.languageLabel), code == 'ar' ? 'العربية · English' : 'English · العربية',
               () => app.toggleLocale()),
+
+          _section(code == 'ar' ? 'عن سند' : 'About Sanad'),
+          _tile(Icons.privacy_tip_outlined, code == 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy',
+              code == 'ar' ? 'كيف نحمي بياناتك' : 'How we protect your data',
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => LegalScreen(
+                  title: code == 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy',
+                  body: code == 'ar' ? privacyAr : privacyEn, fullPath: '/privacy', ar: code == 'ar')))),
+          _tile(Icons.description_outlined, code == 'ar' ? 'شروط الاستخدام' : 'Terms of Use',
+              code == 'ar' ? 'شروط استخدام سند' : 'How Sanad may be used',
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => LegalScreen(
+                  title: code == 'ar' ? 'شروط الاستخدام' : 'Terms of Use',
+                  body: code == 'ar' ? termsAr : termsEn, fullPath: '/terms', ar: code == 'ar')))),
+          _tile(Icons.alternate_email, code == 'ar' ? 'تواصل معنا' : 'Contact us',
+              'rakeeza.ly@gmail.com',
+              () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ContactScreen(ar: code == 'ar')))),
 
           _section(code == 'ar' ? 'الدعم' : 'Support'),
           _tile(Icons.self_improvement, tr(S.sosButton), tr(S.sosCue),
