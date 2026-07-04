@@ -39,7 +39,10 @@ workflows:
       - name: Regenerate iOS native + patch Info.plist
         script: |
           cd app
-          flutter create --platforms=ios --org ly.com --project-name sanad .
+          # Create BOTH native platforms: flutter_launcher_icons / flutter_native_splash
+          # read the pubspec config for android+ios and crash if the android/ folder is
+          # missing (exit 255). We still only build the IPA below.
+          flutter create --platforms=ios,android --org ly.com --project-name sanad .
           bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
           dart run flutter_launcher_icons
           dart run flutter_native_splash:create
