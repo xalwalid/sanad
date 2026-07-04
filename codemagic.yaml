@@ -61,8 +61,52 @@ workflows:
       - name: Build IPA
         script: |
           cd app
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          # Compile Flutter + install pods without signing.
+          flutter build ios --release --no-codesign
+          # Archive with MANUAL distribution signing (flutter build ipa uses automatic/
+          # development signing and can't see the distribution cert — this is the we-speak fix).
+          set -o pipefail
+          ARCHIVE_PATH="/tmp/Runner.xcarchive"
+          rm -rf "$ARCHIVE_PATH"
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$ARCHIVE_PATH" \
+            DEVELOPMENT_TEAM=L27Z2WV29H \
+            "CODE_SIGN_IDENTITY=iPhone Distribution" \
+            CODE_SIGN_STYLE=Manual \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            archive 2>&1 | tee /tmp/xcodebuild.log
+          # Reference the exact provisioning profile the archive embedded.
+          EMBED="$ARCHIVE_PATH/Products/Applications/Runner.app/embedded.mobileprovision"
+          security cms -D -i "$EMBED" > /tmp/embedded-profile.plist 2>/dev/null
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /tmp/embedded-profile.plist 2>/dev/null || echo "")
+          echo "Embedded profile: '$PROFILE_NAME'"
+          mkdir -p build/ios/ipa
+          cat > /tmp/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>L27Z2WV29H</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>ly.com.sanad</key><string>$PROFILE_NAME</string>
+            </dict>
+            <key>uploadSymbols</key><true/>
+            <key>compileBitcode</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist /tmp/ExportOptions.plist \
+            -allowProvisioningUpdates 2>&1 | tee /tmp/export.log
     artifacts:
       - app/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
