@@ -43,6 +43,12 @@ workflows:
           # read the pubspec config for android+ios and crash if the android/ folder is
           # missing (exit 255). We still only build the IPA below.
           flutter create --platforms=ios,android --org ly.com --project-name sanad .
+          # Disable code signing on CocoaPods framework targets. They are embedded and
+          # re-signed with the app during archiving, so signing them individually with the
+          # distribution cert fails ("No iOS Distribution signing certificate ... in target
+          # 'gal'/'url_launcher_ios' from project 'Pods'"). Inject into the Podfile's
+          # post_install hook (runs when pod install happens during `flutter build ios`).
+          ruby -e "p='ios/Podfile'; s=File.read(p); n='    flutter_additional_ios_build_settings(target)'; s=s.sub(n, n + %Q(\n    target.build_configurations.each { |bc| bc.build_settings['CODE_SIGNING_ALLOWED']='NO' })) if s.include?(n); File.write(p,s); puts 'Podfile patched: CODE_SIGNING_ALLOWED=NO for pods'"
           bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
           dart run flutter_launcher_icons
           dart run flutter_native_splash:create
@@ -83,7 +89,7 @@ workflows:
             -destination "generic/platform=iOS" \
             -archivePath "$ARCHIVE_PATH" \
             DEVELOPMENT_TEAM=L27Z2WV29H \
-            "CODE_SIGN_IDENTITY=Apple Distribution" \
+            "CODE_SIGN_IDENTITY=iPhone Distribution" \
             CODE_SIGN_STYLE=Manual \
             COMPILER_INDEX_STORE_ENABLE=NO \
             archive 2>&1 | tee /tmp/xcodebuild.log
