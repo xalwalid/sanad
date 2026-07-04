@@ -61,13 +61,10 @@ workflows:
           keychain initialize
           # Register the App ID if it doesn't exist yet (idempotent; we only ever touch OUR bundle id).
           app-store-connect bundle-ids register "$BUNDLE_ID" --name "Sanad" --platform IOS 2>/dev/null || true
-          # --certificate-key pairs the distribution cert with its PRIVATE KEY (from the
-          # ios-signing group) in the keychain. Without it the archive fails with
-          # "No iOS Distribution signing certificate ... with a private key was found".
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --certificate-key @env:CERTIFICATE_PRIVATE_KEY \
-            --create
+          # Fetch/create the App Store provisioning profile + distribution certificate.
+          # The distribution cert's PRIVATE KEY comes from the ios-signing group's
+          # CERTIFICATE_PRIVATE_KEY, which `keychain add-certificates` pairs automatically.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           xcode-project use-profiles   # also writes /Users/builder/export_options.plist used by the build step
       - name: Build IPA
