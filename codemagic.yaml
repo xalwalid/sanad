@@ -87,3 +87,92 @@ workflows:
         auth: integration
         submit_to_testflight: true
         submit_to_app_store: false
+# Codemagic — cloud iOS build for Sanad (Flutter). No Mac needed.
+# Mirrors the Tripoli Streets setup. Free tier (500 macOS min/mo) is plenty.
+#
+# One-time Codemagic setup (Team settings):
+#   1. Add the Sanad repo (xalwalid/sanad).
+#   2. App Store Connect integration (App Store Connect API key .p8 + Key ID +
+#      Issuer ID). You already have one from Tripoli Streets — reuse the same
+#      Apple account (Team L27Z2WV29H). Name the integration below.
+#   3. Create the App record in App Store Connect with bundle id ly.com.sanad,
+#      then put its numeric Apple ID into APP_STORE_APP_ID.
+workflows:
+  ios-release:
+    name: Sanad iOS (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    integrations:
+      app_store_connect: tripoli-streets   # reuse the Tripoli Streets ASC API key (same Apple account, Team L27Z2WV29H)
+    environment:
+      # NOTE: no `ios_signing:` preflight block on purpose (its cache fails with
+      # "No matching profiles"). We provision inline via fetch-signing-files below.
+      groups:
+        - ios-signing        # CERTIFICATE_PRIVATE_KEY = iOS Distribution cert (shared, from Tripoli Streets)
+      flutter: 3.29.0
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "ly.com.sanad"
+        APP_STORE_APP_ID: "6787402406"   # numeric Apple ID of the "Sanad - Recovery Companion" App Store Connect record
+    scripts:
+      - name: Flutter deps
+        script: cd app && flutter pub get
+      - name: Regenerate iOS native + patch Info.plist
+        script: |
+          cd app
+          # Create BOTH native platforms: flutter_launcher_icons / flutter_native_splash
+          # read the pubspec config for android+ios and crash if the android/ folder is
+          # missing (exit 255). We still only build the IPA below.
+          flutter create --platforms=ios,android --org ly.com --project-name sanad .
+          # Disable code signing on CocoaPods framework targets. They are embedded and
+          # re-signed with the app during archiving, so signing them individually with the
+          # distribution cert fails ("No iOS Distribution signing certificate ... in target
+          # 'gal'/'url_launcher_ios' from project 'Pods'"). Inject into the Podfile's
+          # post_install hook (runs when pod install happens during `flutter build ios`).
+          ruby -e "p='ios/Podfile'; s=File.read(p); n='    flutter_additional_ios_build_settings(target)'; s=s.sub(n, n + %Q(\n    target.build_configurations.each { |bc| bc.build_settings['CODE_SIGNING_ALLOWED']='NO' })) if s.include?(n); File.write(p,s); puts 'Podfile patched: CODE_SIGNING_ALLOWED=NO for pods'"
+          bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
+          dart run flutter_launcher_icons
+          dart run flutter_native_splash:create
+      - name: Set build number
+        script: |
+          cd app/ios
+          agvtool new-version -all $(($BUILD_NUMBER))
+      - name: Signing (register App ID + fetch/create App Store profile)
+        script: |
+          keychain initialize
+          # Register the App ID if it doesn't exist yet (idempotent; we only ever touch OUR bundle id).
+          app-store-connect bundle-ids register "$BUNDLE_ID" --name "Sanad" --platform IOS 2>/dev/null || true
+          # Fetch/create the App Store provisioning profile + distribution certificate.
+          # The distribution cert's PRIVATE KEY comes from the ios-signing group's
+          # CERTIFICATE_PRIVATE_KEY, which `keychain add-certificates` pairs automatically.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles   # also writes /Users/builder/export_options.plist used by the build step
+      - name: Build IPA
+        script: |
+          cd app
+          # flutter build first runs pod install (Pods have code signing disabled above).
+          flutter build ios --release --no-codesign
+          # Codemagic's build-ipa reads the profiles that `use-profiles` installed and
+          # archives + exports with correct MANUAL distribution signing. It assigns the
+          # profile to the Runner target automatically (the hand-rolled xcodebuild archive
+          # did not, causing "Runner requires a provisioning profile").
+          xcode-project build-ipa \
+            --workspace ios/Runner.xcworkspace \
+            --scheme Runner
+    artifacts:
+      - app/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
