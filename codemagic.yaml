@@ -13,15 +13,26 @@ workflows:
     name: Sanad iOS (TestFlight)
     instance_type: mac_mini_m2
     max_build_duration: 60
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
     integrations:
-      app_store_connect: CODEMAGIC_ASC_INTEGRATION_NAME   # <-- set to your integration name
+      app_store_connect: tripoli-streets   # reuse the Tripoli Streets ASC API key (same Apple account, Team L27Z2WV29H)
     environment:
+      # NOTE: no `ios_signing:` preflight block on purpose (its cache fails with
+      # "No matching profiles"). We provision inline via fetch-signing-files below.
+      groups:
+        - ios-signing        # CERTIFICATE_PRIVATE_KEY = iOS Distribution cert (shared, from Tripoli Streets)
       flutter: 3.29.0
       xcode: latest
       cocoapods: default
       vars:
         BUNDLE_ID: "ly.com.sanad"
-        APP_STORE_APP_ID: "PUT_NUMERIC_APPLE_ID_HERE"
+        APP_STORE_APP_ID: "6787402406"   # numeric Apple ID of the "Sanad - Recovery Companion" App Store Connect record
     scripts:
       - name: Flutter deps
         script: cd app && flutter pub get
@@ -36,12 +47,14 @@ workflows:
         script: |
           cd app/ios
           agvtool new-version -all $(($BUILD_NUMBER))
-      - name: Signing (fetch/create App Store profile)
+      - name: Signing (register App ID + fetch/create App Store profile)
         script: |
           keychain initialize
+          # Register the App ID if it doesn't exist yet (idempotent; we only ever touch OUR bundle id).
+          app-store-connect bundle-ids register "$BUNDLE_ID" --name "Sanad" --platform IOS 2>/dev/null || true
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles   # also writes /Users/builder/export_options.plist used by the build step
       - name: Build IPA
         script: |
           cd app
