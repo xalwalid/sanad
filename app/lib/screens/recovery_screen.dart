@@ -13,8 +13,12 @@ class RecoveryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     final code = app.lang;
+    // Deleting the journey nulls the profile while this tab is still mounted
+    // in the IndexedStack; app.stats would throw. Bail out for that frame.
+    final p = app.profile;
+    if (p == null) return const SizedBox.shrink();
     final days = app.stats.daysClean;
-    final c = RecoveryContent.instance.forHabit(app.profile!.habit.id);
+    final c = RecoveryContent.instance.forHabit(p.habit.id);
     final week = c.weekFor(days);
     final healed = c.indicators.where((i) => days >= i.full).length;
 
