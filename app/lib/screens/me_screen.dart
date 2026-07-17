@@ -30,8 +30,12 @@ class MeScreen extends StatelessWidget {
     final app = context.watch<AppState>();
     final code = app.lang;
     String tr(L l) => l.t(code);
+    // Deleting the journey (below) nulls the profile while this tab is still
+    // mounted; app.stats would throw. Bail out for that frame - the gate then
+    // swaps the shell out for onboarding.
+    final p = app.profile;
+    if (p == null) return const SizedBox.shrink();
     final s = app.stats;
-    final p = app.profile!;
     final cur = code == 'ar' ? 'د.ل' : 'LYD';
 
     return SafeArea(
