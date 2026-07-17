@@ -36,10 +36,25 @@ class SanadApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             // Directionality follows the locale automatically (RTL for ar).
-            home: app.hasProfile ? const RootShell() : const OnboardingScreen(),
+            home: const _RootGate(),
           );
         },
       ),
     );
+  }
+}
+
+/// Decides between onboarding and the app shell *inside* the route, so the
+/// swap is driven by a widget that lives under the Navigator. Deleting a
+/// journey sets the profile to null; this rebuilds first (it is shallower than
+/// the tabs) and tears the shell down before any tab can build against a
+/// null profile - which used to throw and leave a blank screen.
+class _RootGate extends StatelessWidget {
+  const _RootGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final hasProfile = context.select<AppState, bool>((a) => a.hasProfile);
+    return hasProfile ? const RootShell() : const OnboardingScreen();
   }
 }
