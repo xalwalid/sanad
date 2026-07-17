@@ -14,6 +14,9 @@ class ProgressScreen extends StatelessWidget {
     final app = context.watch<AppState>();
     final code = app.lang;
     String tr(L l) => l.t(code);
+    // Deleting the journey nulls the profile while this tab is still mounted in
+    // the IndexedStack; app.stats would throw. Bail out for that frame.
+    if (app.profile == null) return const SizedBox.shrink();
     final s = app.stats;
     final checkins = app.checkIns.reversed.toList(); // newest first
     final last7 = app.checkIns.length <= 7
