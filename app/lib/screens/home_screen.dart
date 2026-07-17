@@ -45,8 +45,12 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
     final app = context.watch<AppState>();
     final code = app.lang;
     String tr(L l) => l.t(code);
+    // The journey can be deleted while this tab is still alive in the
+    // IndexedStack; bail out for that frame instead of dereferencing a null
+    // profile (app.stats does too). The gate then swaps to onboarding.
+    final p = app.profile;
+    if (p == null) return const SizedBox.shrink();
     final s = app.stats;
-    final p = app.profile!;
     final habitName = habitTitle(p, code);
 
     final since = DateTime.now().difference(p.quitDate);
