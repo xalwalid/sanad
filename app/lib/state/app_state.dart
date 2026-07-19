@@ -41,8 +41,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> createProfile(RecoveryProfile p) async {
     _profile = p;
+    notifyListeners(); // swap to the app shell immediately, then persist
     await _store!.writeProfile(p);
-    notifyListeners();
   }
 
   /// Mutate the profile then persist + notify.
@@ -88,10 +88,10 @@ class AppState extends ChangeNotifier {
 
   /// Delete the whole journey — wipes everything and returns to onboarding.
   Future<void> deleteJourney() async {
-    await _store!.clearAll();
     _profile = null;
     pledgedToday = false;
-    notifyListeners();
+    notifyListeners(); // swap to onboarding immediately, then wipe storage
+    await _store!.clearAll();
   }
 
   String exportBackup() => _store!.exportBackup();
