@@ -7,7 +7,6 @@ import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import '../widgets/calendar.dart';
 import '../widgets/setup_cards.dart';
-import 'root_shell.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -44,9 +43,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       quitDate: _quit,
     );
     v.applyTo(p);
+    // Create the profile and let the root gate (main.dart) swap to the app
+    // shell reactively. Do NOT pushReplacement(RootShell) here: that would
+    // discard the gate route, so a later "delete journey" (which nulls the
+    // profile) would have nothing to swap back to and would blank the screen.
     context.read<AppState>().createProfile(p);
-    Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const RootShell()));
   }
 
   @override
