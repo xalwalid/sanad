@@ -61,6 +61,10 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(243,240,232,.85);
 .badge .b-txt{text-align:start;line-height:1.2}
 .badge .b-small{font-size:11px;opacity:.82;display:block}
 .badge .b-big{font-size:17px;font-weight:800}
+a.badge{text-decoration:none;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+a.badge:hover{text-decoration:none;transform:translateY(-2px);box-shadow:0 16px 34px rgba(20,58,47,.30)}
+.badge.pending{background:transparent;border:1.5px dashed var(--border);color:var(--muted);box-shadow:none}
+.badge.pending svg{fill:var(--muted)}
 .soon{font-size:14px;color:var(--muted);margin:0;max-width:52ch}
 .soon a{font-weight:700}
 
