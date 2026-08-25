@@ -25,6 +25,11 @@ jobs:
       - name: Generate native folders
         run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
         working-directory: ${{ env.APP_DIR }}
+      # Google Play requires targetSdk 36 (Android 16) for any app update from
+      # Aug 31, 2026. android/ is regenerated above, so patch it every build.
+      - name: Target Android 16 (API 36)
+        run: bash ../scripts/patch-android-sdk.sh
+        working-directory: ${{ env.APP_DIR }}
       - name: Patch AndroidManifest (url_launcher queries)
         run: bash ../scripts/patch-android-manifest.sh
         working-directory: ${{ env.APP_DIR }}
