@@ -13,6 +13,7 @@ on:
     branches: [main, staging]
     paths:
       - "app/**"
+      - "scripts/**"
       - ".github/workflows/sanad-app-build.yml"
   workflow_dispatch:
 
@@ -55,6 +56,11 @@ jobs:
           channel: stable
       - name: Generate native folders
         run: flutter create --platforms=android,ios --org ${{ env.ORG }} --project-name sanad .
+        working-directory: ${{ env.APP_DIR }}
+      # Google Play requires targetSdk 36 (Android 16) for any app update from
+      # Aug 31, 2026. android/ is regenerated above, so we patch it every build.
+      - name: Target Android 16 (API 36)
+        run: bash ../scripts/patch-android-sdk.sh
         working-directory: ${{ env.APP_DIR }}
       - run: flutter pub get
         working-directory: ${{ env.APP_DIR }}
