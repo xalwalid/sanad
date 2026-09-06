@@ -9,6 +9,7 @@
 #    encryption, so declare it here — this lets Codemagic auto-submit each build
 #    to TestFlight instead of failing post-processing with "missing export
 #    compliance" (which then needs answering by hand in App Store Connect).
+# 3) CFBundleLocalizations = ar + en so the App Store lists Arabic as supported.
 set -euo pipefail
 PLIST="${1:-ios/Runner/Info.plist}"
 DESC="لحفظ بطاقة إنجازك في معرض الصور · Save your Sanad achievement card to your Photos."
@@ -21,4 +22,12 @@ done
 /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
 
-echo "Patched $PLIST with photo-library usage strings + export-compliance flag"
+# 3) Declared localizations. Flutter apps localize via ARB/intl, not .lproj
+#    folders, so without this key the App Store reads the binary as English-only
+#    and suppresses Arabic search/discovery for an Arabic-first app.
+/usr/libexec/PlistBuddy -c "Delete :CFBundleLocalizations" "$PLIST" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations array" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations:0 string ar" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations:1 string en" "$PLIST"
+
+echo "Patched $PLIST with photo-library usage strings + export-compliance flag + localizations (ar, en)"
