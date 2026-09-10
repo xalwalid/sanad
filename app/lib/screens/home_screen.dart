@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../logic/calculations.dart';
+import '../models/models.dart';
 import '../state/app_state.dart';
 import '../theme/sanad_theme.dart';
 import '../widgets/progress_ring.dart';
@@ -22,6 +23,8 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
   Timer? _t;
   late final AnimationController _breathe;
+  PageController? _pager;
+  int _pagerCount = 0;
 
   @override
   void initState() {
@@ -35,22 +38,48 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
   void dispose() {
     _t?.cancel();
     _breathe.dispose();
+    _pager?.dispose();
     super.dispose();
   }
 
   String two(int n) => n < 10 ? '0$n' : '$n';
 
+  /// One controller per habit-count. Adding or deleting a habit rebuilds the
+  /// pager on the (new) active index instead of leaving it on a stale page.
+  PageController _pagerFor(AppState app) {
+    if (_pager == null || _pagerCount != app.profiles.length) {
+      _pager?.dispose();
+      _pager = PageController(initialPage: app.activeIndex);
+      _pagerCount = app.profiles.length;
+    }
+    return _pager!;
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
-    final code = app.lang;
-    String tr(L l) => l.t(code);
     // The journey can be deleted while this tab is still alive in the
     // IndexedStack; bail out for that frame instead of dereferencing a null
-    // profile (app.stats does too). The gate then swaps to onboarding.
-    final p = app.profile;
-    if (p == null) return const SizedBox.shrink();
-    final s = app.stats;
+    // profile. The gate then swaps to onboarding.
+    final profiles = app.profiles;
+    if (profiles.isEmpty) return const SizedBox.shrink();
+    if (profiles.length == 1) return _page(context, app, profiles.first, false);
+
+    // Several habits: one page per habit, swipe to switch. Every other tab
+    // follows the page that is showing (AppState.activeIndex).
+    return PageView.builder(
+      key: ValueKey(profiles.length),
+      controller: _pagerFor(app),
+      itemCount: profiles.length,
+      onPageChanged: (i) => app.setActive(i),
+      itemBuilder: (_, i) => _page(context, app, profiles[i], true),
+    );
+  }
+
+  Widget _page(BuildContext context, AppState app, RecoveryProfile p, bool multi) {
+    final code = app.lang;
+    String tr(L l) => l.t(code);
+    final s = app.statsFor(p);
     final habitName = habitTitle(p, code);
 
     final since = DateTime.now().difference(p.quitDate);
@@ -85,6 +114,10 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
               ],
             ),
           ),
+          if (multi) ...[
+            const SizedBox(height: 10),
+            _dots(app.profiles.length, app.profiles.indexOf(p), tr(S.swipeHint)),
+          ],
           const SizedBox(height: 16),
           _clockCard(s, tr, code, h, m, sec),
           const SizedBox(height: 14),
@@ -108,6 +141,30 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
       ),
     );
   }
+
+  /// Page indicator for several habits.
+  Widget _dots(int count, int active, String hint) => Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(count, (i) {
+              final on = i == active;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: on ? 18 : 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: on ? SanadColors.primary : SanadColors.border,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 4),
+          Text(hint, style: const TextStyle(color: SanadColors.textSecondary, fontSize: 11)),
+        ],
+      );
 
   Widget _clockCard(Stats s, String Function(L) tr, String code, int h, int m, int sec) {
     return Container(
@@ -250,8 +307,8 @@ class _HomeTabState extends State<HomeTab> with SingleTickerProviderStateMixin {
         ),
       );
 
-  Widget _statsGrid(Stats s, p, String code) {
-    final cur = code == 'ar' ? 'د.ل' : 'LYD';
+  Widget _statsGrid(Stats s, RecoveryProfile p, String code) {
+    final cur = currencyLabel(p, code);
     final unitWord = p.usageUnit.isNotEmpty ? p.usageUnit : habitUnits[p.habit]!.first.t(code);
     final cells = [
       _stat(S.mMoney.t(code), p.costOn ? '${s.money} $cur' : '—'),

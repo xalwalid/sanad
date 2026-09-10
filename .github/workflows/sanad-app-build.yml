@@ -40,6 +40,8 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
       - run: flutter analyze --no-fatal-infos
         working-directory: ${{ env.APP_DIR }}
+      - run: flutter test
+        working-directory: ${{ env.APP_DIR }}
 
   build-android:
     needs: analyze-and-test

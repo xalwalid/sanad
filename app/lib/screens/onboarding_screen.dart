@@ -18,14 +18,19 @@ const _habitIcons = {
   Habit.other: Icons.more_horiz,
 };
 
+/// First-run setup, and — with [addMode] — the same steps pushed as a route
+/// from the Me tab to track one more habit. In add mode the welcome step is
+/// skipped and finishing pops back to the shell (never pushReplacement — the
+/// root gate must stay the only place RootShell is built).
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.addMode = false});
+  final bool addMode;
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  int _step = 0; // 0 welcome, 1 habit, 2 date, 3 spend
+  late int _step = widget.addMode ? 1 : 0; // 0 welcome, 1 habit, 2 date, 3 spend
   Habit _habit = Habit.cannabis;
   DateTime _quit = DateTime.now();
 
@@ -48,6 +53,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // discard the gate route, so a later "delete journey" (which nulls the
     // profile) would have nothing to swap back to and would blank the screen.
     context.read<AppState>().createProfile(p);
+    if (widget.addMode) Navigator.of(context).pop();
+  }
+
+  void _back() {
+    if (_step == 1 && widget.addMode) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _step--);
+    }
   }
 
   @override
@@ -87,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: SanadColors.heading),
-            onPressed: () => setState(() => _step--),
+            onPressed: _back,
           ),
           Expanded(child: _progress(active)),
           const SizedBox(width: 48),

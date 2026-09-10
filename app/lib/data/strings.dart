@@ -41,6 +41,7 @@ class S {
   static const tapToSeeMore = L('اضغط على أيّ مؤشّر لعرض تفاصيله', 'Tap any indicator to see details');
   static const perDay = L('مرّات/يوم', 'times/day');
   static const minutes = L('دقيقة', 'min');
+  static const currencyLabel = L('العملة', 'Currency');
   static const monthlyEst = L('ستوفّر نحو {x} {cur} شهريًا', "You'll save about {x} {cur} monthly");
 
   // cost periods
@@ -151,6 +152,15 @@ class S {
   static const editQuitDateSub = L('صحّح اليوم الذي بدأت فيه', 'Correct the day you started');
   static const relapseReset = L('سجّل انتكاسة', 'Log a relapse');
   static const relapseResetSub = L('بداية جديدة — مع حفظ سجلّك', 'A fresh start — your history is kept');
+  // several habits at once
+  static const addHabit = L('أضف عادة أخرى', 'Add another habit');
+  static const addHabitSub = L('تابع أكثر من عادة، لكلٍّ رحلتها', 'Track more than one habit, each with its own journey');
+  static const swipeHint = L('اسحب للتبديل بين عاداتك', 'Swipe to switch between your habits');
+  static const deleteHabit = L('حذف هذه العادة', 'Delete this habit');
+  static const deleteHabitSub = L('يزيل هذه العادة فقط ويبقي الباقي', 'Removes only this habit and keeps the rest');
+  static const deleteHabitTitle = L('حذف {habit}؟', 'Delete {habit}?');
+  static const deleteHabitBody = L('سيُمسح تاريخ بداية هذه العادة وتقدّمها نهائيًا. عاداتك الأخرى لن تتأثر.',
+      'This habit\'s start date and progress will be erased for good. Your other habits are not affected.');
   static const deleteJourney = L('حذف الرحلة', 'Delete journey');
   static const deleteJourneySub = L('يمسح كل بياناتك ويبدأ من جديد', 'Erases all your data and starts over');
   static const deleteConfirmTitle = L('حذف رحلتك؟', 'Delete your journey?');
