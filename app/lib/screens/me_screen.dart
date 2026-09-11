@@ -59,7 +59,6 @@ class MeScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(tr(S.anonName),
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
-                Text(p.countryCode, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 12)),
               ],
             ),
           ),

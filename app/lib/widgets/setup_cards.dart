@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../logic/calculations.dart';
 import '../models/models.dart';
 import '../theme/sanad_theme.dart';
+
+/// ISO currency code of the phone's region (USD, EUR, SAR…), LYD when the
+/// region is unknown. Only a default — the user can type anything.
+String deviceCurrency() {
+  try {
+    final loc = WidgetsBinding.instance.platformDispatcher.locale;
+    if (loc.countryCode == null || loc.countryCode!.isEmpty) return 'LYD';
+    final name = NumberFormat.simpleCurrency(locale: loc.toString()).currencyName;
+    return (name == null || name.isEmpty) ? 'LYD' : name;
+  } catch (_) {
+    return 'LYD';
+  }
+}
 
 /// Mutable holder for the cost/time/usage setup, shared by onboarding + edit.
 class SetupValues {
@@ -42,6 +56,7 @@ class SetupValues {
 
   factory SetupValues.defaults(Habit habit, String code) => SetupValues(
         costOn: true, costPeriod: CostPeriod.daily, costAmount: 15,
+        currency: deviceCurrency(),
         timeOn: true, timeAmount: 60,
         usageOn: true, usageAmount: 2,
         usageUnit: habitUnits[habit]!.first.t(code), usagePeriod: CostPeriod.daily,
