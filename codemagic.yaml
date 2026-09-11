@@ -50,6 +50,7 @@ workflows:
           # post_install hook (runs when pod install happens during `flutter build ios`).
           ruby -e "p='ios/Podfile'; s=File.read(p); n='    flutter_additional_ios_build_settings(target)'; s=s.sub(n, n + %Q(\n    target.build_configurations.each { |bc| bc.build_settings['CODE_SIGNING_ALLOWED']='NO' })) if s.include?(n); File.write(p,s); puts 'Podfile patched: CODE_SIGNING_ALLOWED=NO for pods'"
           bash ../scripts/patch-ios-plist.sh ios/Runner/Info.plist
+          bash ../scripts/patch-ios-deployment-target.sh 15.0 ios
           dart run flutter_launcher_icons
           dart run flutter_native_splash:create
       - name: Set build number
