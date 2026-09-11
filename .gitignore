@@ -37,6 +37,7 @@ Thumbs.db
 # --- helper scripts / logs (local only) ---
 _push_to_github.bat
 _push_update.bat
+_push_staging.bat
 _install_flutter.bat
 _flutter_verify.bat
 _flutter_doctor.txt

@@ -27,7 +27,7 @@ class ShareCardScreen extends StatelessWidget {
     final s = app.stats;
     final p = app.profile!;
     final hu = RecoveryContent.instance.forHabit(p.habit.id);
-    final cur = code == 'ar' ? 'د.ل' : 'LYD';
+    final cur = currencyLabel(p, code);
     final massVal = hu.massPer * s.cardUnits;
     final unitWord = p.usageUnit.isNotEmpty ? p.usageUnit : habitUnits[p.habit]!.first.t(code);
 

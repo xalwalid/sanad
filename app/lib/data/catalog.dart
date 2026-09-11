@@ -42,6 +42,14 @@ const Map<Habit, List<L>> habitUnits = {
 };
 
 /// Display name for a profile's habit — the user's typed name for 'other'.
+/// Currency shown next to money. Free text chosen by the user; the default
+/// 'LYD' keeps rendering as د.ل in Arabic so existing journeys look unchanged.
+String currencyLabel(RecoveryProfile p, String code) {
+  final c = p.currency.trim();
+  if (c.isEmpty || c.toUpperCase() == 'LYD') return code == 'ar' ? 'د.ل' : 'LYD';
+  return c;
+}
+
 String habitTitle(RecoveryProfile p, String code) {
   if (p.habit == Habit.other && (p.customName?.trim().isNotEmpty ?? false)) {
     return p.customName!.trim();

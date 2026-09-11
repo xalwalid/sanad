@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../data/catalog.dart';
 import '../data/strings.dart';
 import '../logic/calculations.dart';
 import '../models/models.dart';
 import '../theme/sanad_theme.dart';
+
+/// ISO currency code of the phone's region (USD, EUR, SAR…), LYD when the
+/// region is unknown. Only a default — the user can type anything.
+String deviceCurrency() {
+  try {
+    final loc = WidgetsBinding.instance.platformDispatcher.locale;
+    if (loc.countryCode == null || loc.countryCode!.isEmpty) return 'LYD';
+    final name = NumberFormat.simpleCurrency(locale: loc.toString()).currencyName;
+    return (name == null || name.isEmpty) ? 'LYD' : name;
+  } catch (_) {
+    return 'LYD';
+  }
+}
 
 /// Mutable holder for the cost/time/usage setup, shared by onboarding + edit.
 class SetupValues {
@@ -12,6 +26,7 @@ class SetupValues {
     required this.costOn,
     required this.costPeriod,
     required this.costAmount,
+    this.currency = 'LYD',
     required this.timeOn,
     required this.timeAmount,
     required this.usageOn,
@@ -23,6 +38,7 @@ class SetupValues {
   bool costOn;
   CostPeriod costPeriod;
   double costAmount;
+  String currency;
   bool timeOn;
   int timeAmount;
   bool usageOn;
@@ -32,6 +48,7 @@ class SetupValues {
 
   factory SetupValues.fromProfile(RecoveryProfile p) => SetupValues(
         costOn: p.costOn, costPeriod: p.costPeriod, costAmount: p.costAmount,
+        currency: p.currency,
         timeOn: p.timeSetupOn, timeAmount: p.timeAmount,
         usageOn: p.usageOn, usageAmount: p.usageAmount,
         usageUnit: p.usageUnit, usagePeriod: p.usagePeriod,
@@ -39,6 +56,7 @@ class SetupValues {
 
   factory SetupValues.defaults(Habit habit, String code) => SetupValues(
         costOn: true, costPeriod: CostPeriod.daily, costAmount: 15,
+        currency: deviceCurrency(),
         timeOn: true, timeAmount: 60,
         usageOn: true, usageAmount: 2,
         usageUnit: habitUnits[habit]!.first.t(code), usagePeriod: CostPeriod.daily,
@@ -46,6 +64,7 @@ class SetupValues {
 
   void applyTo(RecoveryProfile p) {
     p.costOn = costOn; p.costPeriod = costPeriod; p.costAmount = costAmount;
+    p.currency = currency.trim().isEmpty ? 'LYD' : currency.trim();
     p.timeSetupOn = timeOn; p.timeAmount = timeAmount;
     p.usageOn = usageOn; p.usageAmount = usageAmount;
     p.usageUnit = usageUnit; p.usagePeriod = usagePeriod;
@@ -66,6 +85,7 @@ class _SetupCardsState extends State<SetupCards> {
   late final TextEditingController _time;
   late final TextEditingController _usage;
   late final TextEditingController _customUnit;
+  late final TextEditingController _currency;
   late bool _customMode;
 
   String tr(L l) => l.t(widget.code);
@@ -80,18 +100,19 @@ class _SetupCardsState extends State<SetupCards> {
     final opts = habitUnits[widget.habit]!.map((u) => u.t(widget.code)).toList();
     _customMode = v.usageUnit.isNotEmpty && !opts.contains(v.usageUnit);
     _customUnit = TextEditingController(text: _customMode ? v.usageUnit : '');
+    _currency = TextEditingController(text: v.currency);
   }
 
   @override
   void dispose() {
-    _cost.dispose(); _time.dispose(); _usage.dispose(); _customUnit.dispose();
+    _cost.dispose(); _time.dispose(); _usage.dispose(); _customUnit.dispose(); _currency.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final v = widget.values;
-    final cur = widget.code == 'ar' ? 'د.ل' : 'LYD';
+    final cur = currencyLabel(_previewProfile(), widget.code);
     final units = habitUnits[widget.habit]!;
     final monthly = (Stats(_previewProfile()).monthly);
 
@@ -109,6 +130,8 @@ class _SetupCardsState extends State<SetupCards> {
               _periods(v.costPeriod, (pp) => setState(() => v.costPeriod = pp)),
               const SizedBox(height: 10),
               _amount(_cost, cur, (d) => setState(() => v.costAmount = d)),
+              const SizedBox(height: 10),
+              _currencyField(),
               if (v.costOn && monthly > 0)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
@@ -193,10 +216,35 @@ class _SetupCardsState extends State<SetupCards> {
       ? widget.values.usageUnit
       : habitUnits[widget.habit]!.first.t(widget.code);
 
+  /// Free-text currency (e.g. LYD, $, €, ريال). Empty falls back to LYD.
+  Widget _currencyField() => Row(
+        children: [
+          Text(tr(S.currencyLabel), style: const TextStyle(fontSize: 13, color: SanadColors.textSecondary)),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 120,
+            child: TextField(
+              controller: _currency,
+              maxLength: 8,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: SanadColors.heading),
+              decoration: InputDecoration(
+                isDense: true,
+                counterText: '',
+                hintText: widget.code == 'ar' ? 'د.ل' : 'LYD',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onChanged: (t) => setState(() => widget.values.currency = t.trim()),
+            ),
+          ),
+        ],
+      );
+
   RecoveryProfile _previewProfile() {
     final v = widget.values;
     return RecoveryProfile(
       habit: widget.habit, quitDate: DateTime.now(),
+      currency: v.currency,
       costOn: v.costOn, costPeriod: v.costPeriod, costAmount: v.costAmount,
       timeSetupOn: v.timeOn, timeAmount: v.timeAmount,
       usageOn: v.usageOn, usageAmount: v.usageAmount, usagePeriod: v.usagePeriod,

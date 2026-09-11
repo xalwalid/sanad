@@ -11,6 +11,7 @@ import 'sos_screen.dart';
 import 'edit_setup_screen.dart';
 import 'backup_screen.dart';
 import 'about_screens.dart';
+import 'onboarding_screen.dart';
 
 const _habitIcons = {
   Habit.cannabis: Icons.eco_outlined,
@@ -36,7 +37,8 @@ class MeScreen extends StatelessWidget {
     final p = app.profile;
     if (p == null) return const SizedBox.shrink();
     final s = app.stats;
-    final cur = code == 'ar' ? 'د.ل' : 'LYD';
+    final cur = currencyLabel(p, code);
+    final multi = app.profiles.length > 1;
 
     return SafeArea(
       bottom: false,
@@ -57,7 +59,6 @@ class MeScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(tr(S.anonName),
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
-                Text(p.countryCode, style: const TextStyle(color: Color(0xFFBFD6C9), fontSize: 12)),
               ],
             ),
           ),
@@ -73,11 +74,15 @@ class MeScreen extends StatelessWidget {
               () => _editDate(context, app)),
           _tile(Icons.tune, tr(S.editSetup), tr(S.editSetupSub),
               () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditSetupScreen()))),
+          _tile(Icons.add_circle_outline, tr(S.addHabit), tr(S.addHabitSub),
+              () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const OnboardingScreen(addMode: true)))),
 
           _section(code == 'ar' ? 'الرحلة' : 'Journey'),
           _tile(Icons.refresh, tr(S.relapseReset), tr(S.relapseResetSub),
               () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RelapseScreen()))),
-          _tile(Icons.delete_outline, tr(S.deleteJourney), tr(S.deleteJourneySub),
+          _tile(Icons.delete_outline, tr(multi ? S.deleteHabit : S.deleteJourney),
+              tr(multi ? S.deleteHabitSub : S.deleteJourneySub),
               () => _confirmDelete(context, app), danger: true),
 
           _section(code == 'ar' ? 'الخصوصية والبيانات' : 'Privacy & data'),
@@ -129,11 +134,15 @@ class MeScreen extends StatelessWidget {
 
   Future<void> _confirmDelete(BuildContext context, AppState app) async {
     final code = app.lang;
+    final multi = app.profiles.length > 1;
+    final name = app.profile == null ? '' : habitTitle(app.profile!, code);
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(S.deleteConfirmTitle.t(code)),
-        content: Text(S.deleteConfirmBody.t(code)),
+        title: Text(multi
+            ? S.deleteHabitTitle.t(code).replaceFirst('{habit}', name)
+            : S.deleteConfirmTitle.t(code)),
+        content: Text(multi ? S.deleteHabitBody.t(code) : S.deleteConfirmBody.t(code)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(S.cancel.t(code))),
           FilledButton(
@@ -144,7 +153,7 @@ class MeScreen extends StatelessWidget {
         ],
       ),
     );
-    if (ok == true) await app.deleteJourney(); // flips to onboarding via MaterialApp.home
+    if (ok == true) await app.deleteJourney(); // last habit → root gate flips to onboarding
   }
 
   Widget _section(String t) => Padding(

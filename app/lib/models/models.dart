@@ -19,12 +19,13 @@ enum CostPeriod { daily, weekly, hourly, perUse }
 /// The core recovery profile + setup chosen during onboarding.
 class RecoveryProfile {
   RecoveryProfile({
+    String? id,
     required this.habit,
     this.customName,
     required this.quitDate,
     this.longestStreakDays = 0,
     this.countryCode = 'LY',
-    this.currency = 'LYD',
+    this.currency = 'LYD', // free text; 'LYD' renders as د.ل in Arabic
     // cost setup
     this.costOn = true,
     this.costPeriod = CostPeriod.daily,
@@ -44,8 +45,10 @@ class RecoveryProfile {
     this.showUnits = true,
     this.showMass = true,
     this.showHabit = true,
-  });
+  }) : id = id ?? DateTime.now().microsecondsSinceEpoch.toString();
 
+  /// Stable identity for this journey (several habits can be tracked at once).
+  final String id;
   Habit habit;
   String? customName; // user-typed name when habit == other
   DateTime quitDate;
@@ -67,6 +70,7 @@ class RecoveryProfile {
   bool showMoney, showTime, showUnits, showMass, showHabit;
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'habit': habit.id,
         'customName': customName,
         'quitDate': quitDate.toIso8601String(),
@@ -91,6 +95,7 @@ class RecoveryProfile {
       };
 
   factory RecoveryProfile.fromJson(Map<String, dynamic> j) => RecoveryProfile(
+        id: j['id'] as String?,
         habit: Habit.fromId(j['habit'] as String),
         customName: j['customName'] as String?,
         quitDate: DateTime.parse(j['quitDate'] as String),
@@ -146,12 +151,18 @@ class CheckIn {
 }
 
 class Relapse {
-  Relapse({required this.date, this.note = ''});
+  Relapse({required this.date, this.note = '', this.profileId});
   final DateTime date;
   final String note;
+  final String? profileId; // which habit's counter was reset (null = legacy)
 
-  Map<String, dynamic> toJson() =>
-      {'date': date.toIso8601String(), 'note': note};
+  Map<String, dynamic> toJson() => {
+        'date': date.toIso8601String(),
+        'note': note,
+        if (profileId != null) 'profileId': profileId,
+      };
   factory Relapse.fromJson(Map<String, dynamic> j) => Relapse(
-      date: DateTime.parse(j['date'] as String), note: (j['note'] as String?) ?? '');
+      date: DateTime.parse(j['date'] as String),
+      note: (j['note'] as String?) ?? '',
+      profileId: j['profileId'] as String?);
 }
